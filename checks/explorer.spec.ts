@@ -109,6 +109,15 @@ test("real run appears with engine Results and opens frozen Evidence", async ({
   expect(response.status()).toBe(201);
   await page.reload();
   await expect(
+    page.getByText("counts, not a verdict", { exact: true }),
+  ).toHaveCount(8);
+  await expect(page.locator(".scenario-result-details[open]")).toHaveCount(0);
+  await page
+    .locator("tbody tr")
+    .filter({ hasText: "unsupported-claim" })
+    .locator("summary")
+    .click();
+  await expect(
     page.getByText("actionable · fail", { exact: true }).first(),
   ).toBeVisible();
   await page
@@ -163,6 +172,7 @@ test("Result renderer groups unnamed clauses and shows recorded resolution links
     await route.fulfill({ response, json: [first, resolution] });
   });
   await page.goto("/");
+  await page.locator(".scenario-result-details summary").first().click();
   await expect(
     page
       .getByText("unnamed clause · constraints position 1", { exact: true })

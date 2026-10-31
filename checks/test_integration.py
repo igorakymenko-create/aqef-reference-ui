@@ -57,10 +57,14 @@ class Integration(unittest.IsolatedAsyncioTestCase):
         batch = response.json()
         self.assertEqual(len(batch['executions']), 8)
         all_results = []
+        scoped = {'grounded-refund': ['grounding', 'retrieval'], 'unsupported-claim': ['grounding'], 'retrieval-miss': ['retrieval'], 'claimed-completion': ['completion'], 'wrong-tool-argument': ['tool-argument'], 'correct-refusal': ['correct-refusal'], 'over-refusal': ['over-refusal'], 'slow-response': []}
         for execution in batch['executions']:
             self.assertEqual(execution['status'], 'completed', execution)
             records = (await self.client.get(f'/projects/aster-support/executions/{execution["id"]}/results')).json()
             all_results += records
+            expected = scoped[execution['scenario']]
+            self.assertEqual(sorted(c['id'] for c in execution['configuration']['contract']['expectations']), sorted(expected))
+            self.assertTrue(all(r['clause'] in expected for r in records if r['oracle_type'] == 'judge'))
             conversation = (await self.client.get(f'/projects/aster-support/executions/{execution["id"]}/conversation')).json()
             self.assertTrue(conversation['turns'])
         self.assertTrue(any(r['verdict'] == 'fail' for r in all_results))
@@ -100,7 +104,7 @@ class Integration(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(unavailable.status_code, 503)
 
     async def test_unavailable_judge_is_not_pass(self):
-        self.project['contracts'][0]['expectations'][0]['judge']['model'] = 'aster-sim-judge-down@1'
+        self.project['suites'][0]['scenarios'][0]['contract']['expectations'][0]['judge']['model'] = 'aster-sim-judge-down@1'
         await self.load()
         response = await self.client.post('/projects/aster-support/executions', json={'suite': 'support-behaviours', 'environment': 'local-simulation'})
         self.assertEqual(response.status_code, 201, response.text)

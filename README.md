@@ -1,9 +1,10 @@
 # AQEF Reference UI
 
-Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-2** adds
-Workspace (S-2), a YAML editor and Visual Test Designer (S-3), with the owner's UI-1
-simulator and Result-labelling corrections. Connections (S-1) and Test Explorer (S-4)
-remain available. No `reference_ui` or CTS conformance is claimed; UI-3 through UI-6 remain.
+Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-3** adds
+Validator Designer (S-5) and Judge Configuration (S-6) over the shared Workspace YAML
+and Review & Apply flow. Connections (S-1), Workspace (S-2), Visual Test Designer
+(S-3) and Test Explorer (S-4) remain available. No `reference_ui` or CTS conformance
+is claimed; UI-4 through UI-6 remain.
 
 ## Start locally
 
@@ -31,10 +32,12 @@ including changes and history. It never silently overwrites the running Project.
 An import rejection fails startup and prints the engine's error body.
 
 The workspace service separately seeds an empty `./workspace` from `examples/aster/`.
-Existing files are never overwritten by seeding. If you already ran UI-1, open
-Workspace and use **Review & Apply**, inspect the corrected sample diff, then
-**Confirm Apply** to load the six property-specific Judge criteria. Existing engine
-history remains immutable. See [workspace protocol and Apply behaviour](docs/WORKSPACE.md).
+Existing files are never overwritten by seeding. To adopt the UI-3 sample in an
+existing workspace, copy the desired scoped Contract changes from the example into
+the Workspace YAML editor, use **Review & Apply**, inspect the diff, then
+**Confirm Apply**. The [sample scope table](examples/aster/README.md) explains which
+properties belong to each Scenario. Existing engine history remains immutable.
+See [workspace protocol and Apply behaviour](docs/WORKSPACE.md).
 
 `docker compose down` stops the services and retains the database. Changing the
 bootstrap token does not rotate an existing Principal's stored credential: retain
@@ -42,6 +45,16 @@ the token used for that database. Do not remove the volume unless you intend to
 discard all local history.
 
 ## What to inspect
+
+* **Validator Designer**: built-in Constraints, Contract composition, deterministic
+  Custom Validator registration and binding. Model checks offer a draft handoff to
+  Judge Configuration. Validator Confidence and mapped model identifiers block Apply.
+* **Judge Configuration**: Single or explicitly chosen independence/stability panels,
+  engine Consensus methods, visible omitted defaults and latest matching read-only
+  Admission. Subject identity blocks Apply; family similarity warns. See
+  [Oracle authoring](docs/ORACLE-DESIGNERS.md).
+* Explorer rows start collapsed with disposition/verdict counts labelled
+  **counts, not a verdict**. Expand a row for the full clause Results below.
 
 * **Workspace**: browse the file tree, edit highlighted YAML with authoring-schema
   feedback, review created/changed/unchanged resources and diffs, confirm Apply,
@@ -122,7 +135,10 @@ its temporary database is separate from the user's database. Tests cover browsin
 search, unavailable providers, verbatim engine errors, narrow layouts, and a real
 run with Evidence. UI-2 checks also prove visual/YAML authorship equivalence using
 all API fields and engine-frozen effective Contracts, Export → Apply round-trip,
-real partial failure, dependency ordering and secret guards. These are independently
+real partial failure, dependency ordering and secret guards. UI-3 adds deterministic
+registration and execution, mandatory refusals from forms and YAML, draft handoff,
+Admission notices, explicit Multi purpose, both Consensus methods and registry Export.
+These are independently
 authored checks, **not CTS tests**. Stop the user Compose deployment before the
 development checks because they use the same ports; its database volume is retained.
 
@@ -133,7 +149,7 @@ servers:
 npm run test:e2e -- --config playwright.docker.config.ts
 ```
 
-These four checks browse the built static UI through nginx, check provider health
+These five checks browse the built static UI through nginx, check provider health
 and authentication, and run the sample Suite through the real containerized engine.
 The run intentionally remains in the local database as eight Executions with Results
 and Evidence; the sample Gate fails because the simulator includes known defects.

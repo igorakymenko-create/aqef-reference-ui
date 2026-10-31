@@ -6,7 +6,7 @@
 - AQEF 1.0-CR1: Volume XV (Reference UI), Appendices A–C;
 - CTS 1.0-CR1: Section 26, CT-RUI-001 to 004;
 - `aqef-reference-engine` (pin the tag used at the start of work; the latest is `slice-12`);
-- `aqef-cts-harness`, for the scripted-provider pattern.
+- Simulator source: the pinned engine's documented provider protocol only (owner amendment A-1).
 
 ---
 

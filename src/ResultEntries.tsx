@@ -80,6 +80,49 @@ export function ResultEntries({
     </div>
   );
 }
+export function ResultCounts({
+  results,
+  onEvidence,
+}: {
+  results: Result[];
+  onEvidence: (result: Result) => void;
+}) {
+  const counts = new Map<
+    string,
+    { count: number; state: string; label: string }
+  >();
+  for (const result of results) {
+    const invalidated = Boolean(result.invalidated_by?.length);
+    const label = `${invalidated ? "invalidated · " : ""}${result.disposition} · ${result.verdict ?? "no verdict"}`;
+    const entry = counts.get(label) ?? {
+      count: 0,
+      state: invalidated
+        ? "invalidated"
+        : result.disposition === "actionable"
+          ? (result.verdict ?? "neutral")
+          : result.disposition,
+      label,
+    };
+    entry.count++;
+    counts.set(label, entry);
+  }
+  return (
+    <details className="scenario-result-details">
+      <summary>
+        <span className="counts-label">counts, not a verdict</span>
+        <span className="result-counts">
+          {[...counts.values()].map((entry) => (
+            <span className={`badge ${entry.state}`} key={entry.label}>
+              {entry.count} {entry.label}
+            </span>
+          ))}
+        </span>
+        <span className="expand-hint">Expand clause Results</span>
+      </summary>
+      <ResultEntries results={results} onEvidence={onEvidence} />
+    </details>
+  );
+}
 export function ResultEvidence({
   result,
   execution,

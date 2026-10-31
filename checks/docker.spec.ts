@@ -1,5 +1,44 @@
 import { test, expect } from "@playwright/test";
 
+test("built nginx exposes Oracle designers and refuses the subject as a Judge", async ({
+  page,
+}) => {
+  await page.goto("/#judges");
+  await expect(
+    page.getByRole("heading", { name: "Judge Configuration", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Contract attachment", { exact: true })
+    .selectOption({ label: "Scenario support-behaviours/unsupported-claim" });
+  await page
+    .getByLabel("Existing Expectation", { exact: true })
+    .selectOption("0");
+  await expect(
+    page.getByText("Admission · no record", { exact: true }),
+  ).toBeVisible();
+  const project = await (
+    await page.request.get("/api/projects/aster-support")
+  ).json();
+  await page
+    .getByLabel("Judge 1 model", { exact: true })
+    .fill(project.environments[0].model_version);
+  await expect(
+    page.getByRole("button", { name: "Review & Apply", exact: true }),
+  ).toBeDisabled();
+  await expect(page.getByRole("alert").last()).toContainText(
+    "Independent Oracles",
+  );
+  await page.goto("/#validators");
+  await expect(
+    page.getByRole("heading", { name: "Validator Designer", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Validator form" })
+      .getByLabel(/confidence/i),
+  ).toHaveCount(0);
+});
+
 test("nginx serves the built Explorer and the automatically loaded Aster workspace", async ({
   page,
 }) => {
@@ -86,6 +125,11 @@ test("container-to-container subject and Judge calls produce Results and Evidenc
   expect(gates.status()).toBe(200);
   expect((await gates.json()).gates["support-readiness"].status).toBe("fail");
   await page.goto("/");
+  await page
+    .locator("tbody tr")
+    .filter({ hasText: "unsupported-claim" })
+    .locator("summary")
+    .click();
   await expect(
     page.getByText("actionable · fail", { exact: true }).first(),
   ).toBeVisible();

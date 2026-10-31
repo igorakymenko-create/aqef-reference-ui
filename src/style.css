@@ -1242,3 +1242,30 @@ summary {
     flex-wrap: wrap;
   }
 }
+.scenario-result-details summary {
+  cursor: pointer;
+}
+.counts-label,
+.expand-hint {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted, #536477);
+}
+.result-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.35rem 0;
+}
+.scenario-result-details[open] {
+  min-width: 260px;
+}
+.designer-form fieldset {
+  border: 1px solid #ccd5df;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+}
+.admission-status {
+  font-weight: 600;
+}

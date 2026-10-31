@@ -1,5 +1,32 @@
 # Implementation notes
 
+## UI-3 — Oracle designers and UI-2 corrections
+
+S-5/S-6 share WorkspaceScreen's draft, YAML diff, plan and confirmation. Pure rule
+registrations use scoped YAML documents and POST /validators before dependent
+Contracts/Project updates. Export includes registry definitions. No engine source
+or workspace file-service semantics changed. No new dependencies were introduced.
+
+oracleRules.ts applies mandatory authoring refusals to both forms and YAML before
+saving or issuing engine writes, and rechecks at confirmation. Family and changed
+Judge configuration notices are advisory. Admission is paginated and read-only.
+contractEditing.ts edits the chosen document and attachment through the YAML AST.
+Incomplete forms clear any prior proposed YAML. Explorer uses a collapsed Result
+histogram while retaining the full UI-2 Result renderer on expansion.
+
+The sample correction was reviewed/applied through the running UI-2 before UI-3
+completion; its eight Scenarios were re-run and frozen Contracts and Judge Results
+checked against explicit property scopes. checks/sample-scope.spec.ts records this
+repeatable check. Own integration and browser checks cover prior slices and the
+five UI-3 refusal/warning requirements; they use no external conformance material.
+
+Verification: 11 Python integration/file-service checks, 19 UI-1/UI-2/UI-3 browser
+checks, five built nginx deployment checks and the eight-Scenario sample scope
+check passed. TypeScript/Vite production and four-service Compose builds passed;
+all services became healthy using the existing database volume and workspace.
+Vendor checksums match the committed source manifest. The sample's frozen effective
+Contracts and every new Judge Result contain only their explicitly exercised properties.
+
 ## UI-1 — Foundation, Connections, Test Explorer
 
 Scope: Stage 1 brief UI-1, S-1 and S-4. Normative basis: AQEF 1.0-CR1 Volume XV
