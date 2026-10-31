@@ -42,8 +42,17 @@ recorded in AMBIGUITIES.md; no changes were made to the engine.
   the final browser run used an approved execution outside the sandbox and exited
   successfully. This is an execution-environment limitation, not a browser pass
   inferred from a hung run.
-* Docker was not installed in the implementation environment: Compose container
-  startup/build cannot be claimed verified there. The same engine package, sample,
-  simulator and browser application are exercised directly by the local checks.
+* Docker Compose was subsequently verified on Windows with Docker Desktop engine
+  29.9.2 and Compose 5.6.1. `docker compose up -d --build --wait` built all three
+  images, automatically loaded Aster and started nginx on loopback port 3000.
+  No application or engine changes were needed for the container deployment.
+* Three additional Playwright checks passed against the running Compose deployment:
+  Explorer/sample/authentication, all provider health states, and a real eight-Scenario
+  Suite execution with frozen Evidence and an engine-evaluated failed Gate.
+  Unauthenticated access directly to the engine returned 401; the nginx API proxy
+  authenticated successfully without a browser-supplied token.
+* Restarted engine and UI, waited for readiness, and verified all eight Execution IDs
+  were unchanged. Startup reported that the existing Project was preserved.
+  The generated local `.env` stayed ignored by git and its value was not displayed.
 
 No CTS test result, signed external inspection or conformance statement is asserted.

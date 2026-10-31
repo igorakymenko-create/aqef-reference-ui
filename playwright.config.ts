@@ -9,7 +9,7 @@ const env = {
 };
 export default defineConfig({
   testDir: "./checks",
-  testMatch: "*.spec.ts",
+  testMatch: "explorer.spec.ts",
   workers: 1,
   fullyParallel: false,
   use: {

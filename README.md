@@ -102,6 +102,20 @@ its temporary database is separate from the user's database. Tests cover browsin
 search, unavailable providers, verbatim engine errors, narrow layouts, and a real
 run with Evidence. These are independently authored checks, **not CTS tests**.
 
+To check a running Docker Compose deployment instead of starting development
+servers:
+
+```sh
+npm run test:e2e -- --config playwright.docker.config.ts
+```
+
+These three checks browse the built static UI through nginx, check provider health
+and authentication, and run the sample Suite through the real containerized engine.
+The run intentionally remains in the local database as eight Executions with Results
+and Evidence; the sample Gate fails because the simulator includes known defects.
+The checks can be repeated without resetting the database. Compose startup and
+preservation of that history across an engine/UI restart have been verified.
+
 To regenerate the engine vendor snapshot from a local engine checkout that contains
 the pinned commit: `python scripts/vendor_engine.py PATH_TO_ENGINE_CHECKOUT`.
 The script reads only `engine/*.py`, `requirements.txt`, `LICENSE`, and the named
