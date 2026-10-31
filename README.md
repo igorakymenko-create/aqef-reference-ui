@@ -1,10 +1,10 @@
 # AQEF Reference UI
 
-Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-3** adds
-Validator Designer (S-5) and Judge Configuration (S-6) over the shared Workspace YAML
-and Review & Apply flow. Connections (S-1), Workspace (S-2), Visual Test Designer
-(S-3) and Test Explorer (S-4) remain available. No `reference_ui` or CTS conformance
-is claimed; UI-4 through UI-6 remain.
+Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-4** adds
+Runs and Evidence (S-8): new batches, frozen Execution detail, resolution chains,
+Human Review and same-Oracle recovery. Connections, Workspace, visual Scenario and
+Oracle designers, and Test Explorer remain available. No `reference_ui` or CTS
+conformance is claimed; UI-5 and UI-6 remain.
 
 ## Start locally
 
@@ -21,7 +21,8 @@ The first build needs network access for container images and pinned dependencie
 All published ports bind only to loopback. There are four long-running services:
 
 * `engine`: unchanged reference engine, port 8000, persistent SQLite volume;
-* `aster-sim`: scripted subject and Judges, internal port 9100;
+* `aster-sim`: scripted subject and Judges, internal port 9100; separate simulator
+  control port 9101 published only on loopback;
 * `workspace`: YAML-only file service, port 9200, host-mounted `./workspace`;
 * `ui`: static React/TypeScript application in nginx, port 3000.
 
@@ -31,8 +32,15 @@ governed Contract definition. If the Project already exists, startup preserves i
 including changes and history. It never silently overwrites the running Project.
 An import rejection fails startup and prints the engine's error body.
 
+Bootstrap also creates/checks the sample `aster-reviewer` Role and creates the
+local Person `aster-local-person` using the documented Role/Principal API. This
+Person holds admin and the routed review Role. The UI proxy uses its distinct,
+server-only credential derived from the bootstrap token; no extra setup or token
+in the browser is needed. Existing Principals and Roles are not overwritten.
+See [identity limitations and choices](docs/AMBIGUITIES.md#ui-a17--local-reviewer-identity-without-a-current-principal-endpoint).
+
 The workspace service separately seeds an empty `./workspace` from `examples/aster/`.
-Existing files are never overwritten by seeding. To adopt the UI-3 sample in an
+Existing files are never overwritten by seeding. To adopt the UI-4 sample in an
 existing workspace, copy the desired scoped Contract changes from the example into
 the Workspace YAML editor, use **Review & Apply**, inspect the diff, then
 **Confirm Apply**. The [sample scope table](examples/aster/README.md) explains which
@@ -45,6 +53,19 @@ the token used for that database. Do not remove the volume unless you intend to
 discard all local history.
 
 ## What to inspect
+
+* **Runs and Evidence**: choose a Suite and Environment explicitly and start a new
+  batch, without requesting Gates. Every returned Execution remains listed,
+  including infrastructure failures. History is grouped by batch, with engine
+  filters and pagination and counts labelled “counts, not a verdict”. Open an
+  Execution for ordered Conversation, readable context/tool-call Artifacts, frozen
+  configuration, clause Results and recorded panel members/counts. Resolution chains
+  keep every link visible, oldest first. Review eligible Results or re-check an
+  unavailable Oracle using its exact frozen string; the subject is not called.
+  Engine refusals remain verbatim. See [Runs workflow](docs/RUNS-AND-EVIDENCE.md).
+* **Connections → Simulator control**: switch the flaky Judge outage off/on. This
+  separate simulator facility is labelled as outside AQEF. It never changes earlier
+  Results, never resets through a run/re-check, and cannot recover the down Judge.
 
 * **Validator Designer**: built-in Constraints, Contract composition, deterministic
   Custom Validator registration and binding. Model checks offer a draft handoff to
@@ -65,7 +86,7 @@ discard all local history.
   Prompt, Variables/Dataset binding and Constraint/Single Judge clauses. All author
   fields start empty. Every change shows its YAML diff and uses the exact same
   Review & Apply path as the editor; the engine computes the effective Contract.
-* **Test Explorer**: browse Project and Suite definitions, filter eight Scenarios,
+* **Test Explorer**: browse Project and Suite definitions, filter twelve Scenarios,
   inspect their Contracts, Dataset binding, recorded Baselines, latest Execution,
   its engine Results and frozen Evidence. Entries are grouped by clause and show
   Oracle kind/identifier, disposition, verdict, Confidence/not applicable, recorded
@@ -138,6 +159,9 @@ all API fields and engine-frozen effective Contracts, Export → Apply round-tri
 real partial failure, dependency ordering and secret guards. UI-3 adds deterministic
 registration and execution, mandatory refusals from forms and YAML, draft handoff,
 Admission notices, explicit Multi purpose, both Consensus methods and registry Export.
+UI-4 checks add new-batch retention, infrastructure failures, Human capture/Role rules,
+resolution chains, outage recovery without subject calls, panel records, verbatim
+preflight/currency errors and pagination across a batch boundary.
 These are independently
 authored checks, **not CTS tests**. Stop the user Compose deployment before the
 development checks because they use the same ports; its database volume is retained.
@@ -149,10 +173,11 @@ servers:
 npm run test:e2e -- --config playwright.docker.config.ts
 ```
 
-These five checks browse the built static UI through nginx, check provider health
+These six checks browse the built static UI through nginx, check provider health
 and authentication, and run the sample Suite through the real containerized engine.
-The run intentionally remains in the local database as eight Executions with Results
-and Evidence; the sample Gate fails because the simulator includes known defects.
+Runs intentionally remain in the local database as batches of twelve Executions with
+Results and Evidence. UI-4 run controls never request Gates; the retained older
+deployment regression separately checks the pre-existing sample Gate API.
 The checks can be repeated without resetting the database. Compose startup and
 preservation of that history across an engine/UI restart have been verified.
 
@@ -166,7 +191,6 @@ See [implementation and verification](docs/IMPLEMENTATION_NOTES.md),
 
 ## Next slices
 
-UI-3: Validator Designer and Judge Configuration. UI-4: runs and Evidence workflows.
 UI-5: Admission and Seeded Controls. UI-6: Gates, frozen Reports and live Dashboard.
 An external reviewer for final inspection remains to be named by the owner; that
 does not block UI-1. No CTS pass or signed inspection is claimed by this build.

@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { createHash } from "node:crypto";
 import { readFileSync, existsSync } from "node:fs";
 
 export default defineConfig(({ command }) => {
@@ -20,6 +21,10 @@ export default defineConfig(({ command }) => {
             res.setHeader("Content-Type", "application/json");
             res.end(readFileSync("config/providers.json", "utf8"));
           });
+          server.middlewares.use("/person.json", (_req, res) => {
+            res.setHeader("Content-Type", "application/json");
+            res.end(readFileSync("config/person.json", "utf8"));
+          });
         },
       },
     ],
@@ -36,9 +41,18 @@ export default defineConfig(({ command }) => {
           rewrite: (p) => p.replace(/^\/api/, ""),
           configure(proxy) {
             proxy.on("proxyReq", (req) =>
-              req.setHeader("Authorization", `Bearer ${token}`),
+              req.setHeader(
+                "Authorization",
+                `Bearer ${createHash("sha256")
+                  .update(token + ":aqef-reference-ui-person-v1")
+                  .digest("hex")}`,
+              ),
             );
           },
+        },
+        "/sim-control": {
+          target: "http://127.0.0.1:9101",
+          rewrite: (p) => p.replace(/^\/sim-control/, ""),
         },
         "/sim": {
           target: "http://127.0.0.1:9100",

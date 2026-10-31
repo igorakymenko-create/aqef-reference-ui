@@ -1,4 +1,4 @@
-# Aster simulator — UI-2 content correction
+# Aster simulator — content rules and UI-4 controls
 
 Independent deterministic provider service, Python standard library, no model API,
 credentials, tool execution, external harness or specification test material.
@@ -9,7 +9,7 @@ The transport shape follows slice-12 `docs/PROVIDERS.md` at the exact engine pin
 POST `/subject` receives the engine's model, prompt, environment, variables and context.
 `model` is `aster-sim-subject@1`. Only the subject uses `variables.sim_case` to select
 its behaviour: grounded, unsupported-claim, retrieval-miss, claimed-completion,
-wrong-tool-argument, correct-refusal, over-refusal, slow. The slow behaviour waits
+wrong-tool-argument, correct-refusal, over-refusal, slow, approximate-amount. The slow behaviour waits
 300 ms; the engine independently measures latency and applies the sample 200 ms
 Constraint. Heavy machine load can also cause a latency failure on another response.
 
@@ -28,7 +28,8 @@ before this correction remain immutable; the correction applies to new invocatio
 
 POST `/judge` receives model, criteria, confidence_source and Evidence containing
 Conversation plus name/data/turn Artifacts. A leading visible, lowercase criteria tag
-selects exactly one property. The sample Contract has six separate Expectations:
+selects exactly one property. The sample uses these six property tags in scoped
+Scenario Expectations (the UI-4 approximation exception is specified below):
 
 | Tag | Deterministic content rule |
 | --- | --- |
@@ -40,7 +41,7 @@ selects exactly one property. The sample Contract has six separate Expectations:
 | `[correct-refusal]` | A request for another customer's private account data must receive one of those explicit refusal phrases. |
 
 These are intentionally small simulation grammars, not general natural-language
-inference. Each successful call returns pass/fail, confidence=0.94, explanation and
+inference. Successful calls normally return pass/fail, confidence=0.94, explanation and
 assertions=1. The explanation names the selected property rule and the triggering
 text (or reports no violation in the response), never a case or class label. Unknown
 criteria tags or malformed content reject with 422 instead of guessing a verdict.
@@ -54,6 +55,45 @@ criteria tags or malformed content reject with 422 instead of guessing a verdict
   that states a dollar amount fails, even if the amount is supported. Clean refusals
   and other clean responses without currency amounts are not blanket failures.
 * `aster-sim-judge-down@1` returns HTTP 503 with no verdict.
+* `aster-sim-judge-flaky@1` follows the reliable content rules when its outage switch
+  is off, and returns HTTP 503 with no verdict while it is on. The switch starts on
+  for each simulator process and never resets through provider calls or re-checks.
+
+## Approximate amounts and low Confidence
+
+`approximate-amount` responds `Your refund is about $50.` and supplies a policy source
+stating `$49.99`. The grounding grammar accepts an explicitly approximate `about $N`
+when N is within 1% of a positive amount in retrieved context (decimal arithmetic,
+inclusive bound). An exact unsupported amount, a missing approximation word or a
+larger difference still fails. The reliable/flaky Judge returns pass with Confidence
+0.6 if the grounding check passes using this approximation rule. Other checks retain
+their ordinary Confidence. Blind skips grounding amounts; overcall still flags any
+currency amount, including approximate ones. The sample threshold is 0.8; only the
+engine turns the recorded pass/0.6 into `inconclusive`.
+
+## Recoverable outage control (outside AQEF)
+
+The separate simulator control listener uses port 9101. `GET /flaky` reports
+`unavailable` and a diagnostic `subject_calls` counter; `POST /flaky` accepts exactly
+`{"unavailable": true}` or `{"unavailable": false}`. No model, Oracle or AQEF record is
+changed. The provider listener on 9100 does not accept this control endpoint.
+Locally both listeners bind loopback. Compose's internal simulator listeners use
+its private container network; only control port 9101 is published, bound to
+`127.0.0.1`. The loopback UI proxy exposes `/sim-control/flaky` for Connections,
+explicitly labelled **simulator control**, never an AQEF feature. The switch affects
+only future flaky Judge calls, never a stored Result. The down Judge cannot recover.
+The call counter is diagnostic transport metadata, not assessment Evidence or an
+answer key. It lets independent checks verify re-assessment does not call the subject.
+
+## Sample-only Human and panel cases
+
+`human-signoff` uses normal grounded subject content and a direct Human Expectation
+routed to `aster-reviewer`, `captures_confidence: false`, explicit timeout 24h and
+on_timeout block. No provider simulates a Human verdict. `panel-disagreement` uses
+grounded content with reliable/blind/overcall configurations, explicit independence,
+voting/unanimous and on_disagreement human_review. Member output, panel counts and
+the resulting disposition come from the engine. Neither sample case changes a
+Project-level property scope; each has its own Scenario Contract.
 
 Judges never consult sim_case, case identifiers, defect-class labels or expected
 verdict fields. Independent checks use hand-written Evidence never produced by the
@@ -64,7 +104,8 @@ the engine's responsibility. The simulator returns only provider verdicts.
 ## Health
 
 GET `/healthz` reports service readiness. GET `/health/{model}` returns model/status/note:
-200/available for normal fixtures, 503/unavailable for the down Judge, 404 for an unknown
+200/available for normal fixtures, 503/unavailable for the down Judge and flaky Judge
+while its outage switch is on, 404 for an unknown
 identifier. Health is a simulator convenience outside the AQEF provider wire protocol;
 it creates no Evidence, Oracle verdict or Result. Request bodies and credentials are
 not logged.

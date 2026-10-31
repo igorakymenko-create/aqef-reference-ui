@@ -1269,3 +1269,64 @@ summary {
 .admission-status {
   font-weight: 600;
 }
+.run-control,
+.run-filters,
+.returned-batch,
+.run-batch,
+.artifact-card,
+.turn-card,
+.resolution-chain,
+.simulator-control {
+  background: #fff;
+  border: 1px solid #d5dfce;
+  border-radius: 10px;
+  padding: 22px;
+  margin: 24px 0;
+  min-width: 0;
+}
+.chain-link {
+  border-left: 3px solid #b6c9b2;
+  padding: 18px;
+  margin: 18px 0;
+  background: #f8faf6;
+  min-width: 0;
+}
+.chain-record-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.review-form {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid #b6c9b2;
+  margin-top: 12px;
+  background: white;
+}
+.evidence-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.panel-member {
+  padding: 12px;
+  border: 1px solid #d5dfce;
+  margin: 10px 0;
+}
+.infrastructure_failure {
+  background: #f5e1d9;
+  color: #8a3b22;
+}
+.run-batch code,
+.returned-batch code {
+  overflow-wrap: anywhere;
+}
+.sidebar {
+  overflow-y: auto;
+}
+.run-control label, .run-filters label, .review-form label, .run-project-label { display:flex; flex-direction:column; gap:8px; margin:12px 0; font-size:12px; }
+.run-control select, .run-filters select, .run-filters input, .review-form select, .review-form input, .review-form textarea, .run-project-label select { width:100%; min-width:0; border:1px solid #cbd8bd; border-radius:6px; background:#fafbf7; padding:11px; color:inherit; font:inherit; }
+.run-project-label { max-width:300px; }
+.review-form textarea { min-height:90px; }
+.chain-link, .panel-member, .chain-record-heading { overflow-wrap:anywhere; }

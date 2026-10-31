@@ -1,5 +1,45 @@
 # Implementation notes
 
+## UI-4 — Runs and Evidence
+
+Added S-8 over the pinned engine API: synchronous new-batch execution without Gates,
+all returned Execution records, paginated/filtered history grouped by batch, dedicated
+Execution URLs, ordered transcript, readable context/tool Artifacts, recorded latency
+and usage, frozen configuration, clause Results and complete panel output. Results
+follow only recorded resolves links, retain earlier links and label the latest link.
+The UI performs no Gate-effective-state calculation or quality aggregation.
+
+Human Review forms enforce explicit verdict/reason and frozen capture-policy controls;
+uncaptured Confidence is omitted. Route/Role information is displayed as returned.
+Engine currency/permission refusals stay verbatim. Pending Human completion is labelled
+as the engine's sole in-place exception. Same-Oracle unavailable recovery sends the
+exact frozen string, keeps every returned chain link and calls no subject. Corrected
+Oracle actions are disabled until UI-5 Requalification.
+
+Extended the simulator/sample with approximate-amount (pass/0.6 against threshold 0.8),
+flaky unavailable/recovered Judge, direct Human sign-off and a three-member independent
+panel. The outage control is a separate loopback listener/proxy, explicitly labelled
+as a simulator feature. Role/Principal API bootstrap provisions a local review Person
+without changing the engine, existing admin Principal or Role. No token enters browser
+code. No new package dependency, file-service semantics or engine source changed.
+
+Independent checks cover complete/failed Executions, repeat-batch retention, Human
+resolution/capture omission, real Role 403 and stale 409, three-link unavailable recovery
+with no subject call, panel member data, filtered lists, actual run preflight 404/422,
+and API pagination across a batch boundary. Earlier checks remain in the dependency
+chain. Specification/API prose alone was used; no external test material was accessed.
+
+Verification: 12 Python checks passed, including vendor hashes and hand-written
+approximation cases. All 27 UI-1–UI-4 browser checks passed, including 201-record
+pagination, a batch crossing an API page, and mobile Evidence without horizontal
+overflow. TypeScript/Vite and four-service Compose builds passed. The extended
+12-Scenario sample was reviewed/applied through the existing workspace flow, run,
+and checked for scoped Oracle clauses. All six nginx/Docker browser checks passed,
+including Role-authorized Human completion and the unavailable/unavailable/actionable
+recovery chain. After an engine/UI restart, all 92 then-existing Execution IDs and
+the workspace revision matched exactly; both active asset files contained neither
+the bootstrap nor derived local-Person credential. Existing history was retained.
+
 ## UI-3 — Oracle designers and UI-2 corrections
 
 S-5/S-6 share WorkspaceScreen's draft, YAML diff, plan and confirmation. Pure rule

@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import * as api from "./api";
 import { ResultEntries, ResultEvidence, ResultCounts } from "./ResultEntries";
 import { WorkspaceScreen } from "./workspace/WorkspaceScreen";
+import { RunsScreen } from "./runs/RunsScreen";
+import { SimulatorControl } from "./runs/SimulatorControl";
 import "./style.css";
 
 function Badge({
@@ -64,7 +66,7 @@ function Connections() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">DEPLOYMENT / READ ONLY</p>
+          <p className="eyebrow">DEPLOYMENT / PROVIDERS</p>
           <h1>Connections</h1>
           <p className="lede">
             Provider identifiers, their mappings, and whether they answer.
@@ -99,14 +101,16 @@ function Connections() {
                 <code>{url}</code>
                 <p>
                   {model.includes("subject")
-                    ? "Subject · eight scripted support behaviours"
+                    ? "Subject · deterministic support behaviours"
                     : model.includes("blind")
                       ? "Judge · misses unsupported claims"
                       : model.includes("overcall")
                         ? "Judge · flags clean responses"
                         : model.includes("down")
                           ? "Judge · intentionally unavailable"
-                          : "Judge · follows the fixture labels"}
+                          : model.includes("flaky")
+                            ? "Judge · recoverable simulator outage"
+                            : "Judge · checks recorded content"}
                 </p>
               </div>
               <Badge state={health[model] ?? "unknown"}>
@@ -121,6 +125,7 @@ function Connections() {
         secret_ref is used in Stage 1. Provider health uses the simulator's
         explicit health endpoint (G-1).
       </p>
+      <SimulatorControl onChange={() => void refresh()} />
     </>
   );
 }
@@ -480,9 +485,9 @@ function Explorer() {
           <div className="quiet-note">
             <strong>No Result is a state, too.</strong>
             <p>
-              “Not run” and “No Baseline” do not mean pass. Run controls,
-              authoring, Admission and Gate decisions arrive in the following
-              slices.
+              “Not run” and “No Baseline” do not mean pass. Open Runs and
+              Evidence to start a new batch. Admission and Gate decisions remain
+              separate.
             </p>
             <span>UI-1 / Foundation</span>
           </div>
@@ -578,11 +583,17 @@ function Explorer() {
 
 function App() {
   const route = () =>
-    ["connections", "workspace", "designer", "validators", "judges"].includes(
-      location.hash.slice(1),
-    )
+    location.hash.slice(1).startsWith("runs")
       ? location.hash.slice(1)
-      : "explorer";
+      : [
+            "connections",
+            "workspace",
+            "designer",
+            "validators",
+            "judges",
+          ].includes(location.hash.slice(1))
+        ? location.hash.slice(1)
+        : "explorer";
   const [page, setPage] = useState(route());
   useEffect(() => {
     const handler = () => setPage(route());
@@ -621,6 +632,9 @@ function App() {
           <a className={page === "explorer" ? "active" : ""} href="#explorer">
             <span>▦</span>Test Explorer
           </a>
+          <a className={page.startsWith("runs") ? "active" : ""} href="#runs">
+            <span>▷</span>Runs and Evidence
+          </a>
           <a
             className={page === "connections" ? "active" : ""}
             href="#connections"
@@ -629,7 +643,7 @@ function App() {
           </a>
         </nav>
         <div className="sidebar-note">
-          <span className="mini-label">STAGE 1 · UI-3</span>
+          <span className="mini-label">STAGE 1 · UI-4</span>
           <p>
             Definitions first.
             <br />
@@ -657,7 +671,8 @@ function App() {
                 designer: "Visual Test Designer",
                 validators: "Validator Designer",
                 judges: "Judge Configuration",
-              }[page]
+                runs: "Runs and Evidence",
+              }[page.startsWith("runs") ? "runs" : page]
             }
           </span>
           <div>
@@ -687,6 +702,8 @@ function App() {
             <Connections />
           ) : page === "explorer" ? (
             <Explorer />
+          ) : page.startsWith("runs") ? (
+            <RunsScreen route={page} />
           ) : null}
         </main>
       </div>

@@ -1,4 +1,61 @@
-# Ambiguities and engine gaps — UI-1 / UI-2 / UI-3
+# Ambiguities and engine gaps — UI-1 / UI-2 / UI-3 / UI-4
+
+## UI-A17 — Local reviewer identity without a current-Principal endpoint
+
+Owner UI-4 A-5 requires review permission and the routed Role via documented APIs.
+The pin exposes POST /principals, POST/GET /roles, but no current-Principal read or
+Principal update. Bootstrap therefore creates a new Person `aster-local-person`
+holding admin and `aster-reviewer`; it creates/checks the review Role through the
+API, leaving the existing admin Principal and Role untouched. The UI proxy uses that
+Person's distinct server-only credential, derived as SHA-256 of the bootstrap token
+plus `:aqef-reference-ui-person-v1`, consistently in Python, Vite and nginx startup.
+The bootstrap token is never rotated or replaced. No credential enters browser code.
+
+Non-secret config/person.json describes this deployment-owned identity, explicitly
+not a fabricated engine /me response. Affordances use its configured Roles and the
+engine's GET /roles permissions; the engine authorizes every submitted action.
+Bootstrap verifies the derived credential is accepted and fails if required admin
+permissions are missing. A pre-existing Person id is not overwritten on 409; absent
+a Principal-read endpoint, a manually altered conflicting deployment may still be
+refused at action time. Such refusals remain verbatim. No check is weakened.
+
+## UI-A18 — Infrastructure status and filtered/paginated batches
+
+The API guide describes “failed executions”; actual pinned records use the status
+`infrastructure_failure`. The UI preserves the recorded value and labels it as an
+infrastructure failure without a quality verdict. Status filters use the actual
+queued/running/completed/infrastructure_failure strings. No failed Execution is
+dropped because it lacks Results or a completed transcript (409).
+
+GET /executions paginates Executions, not batches. To avoid showing a page fragment
+as a complete batch, read every matching engine page before grouping; then paginate
+the display by ten batches. With status/date filters, label counts as matching
+Executions only. Result histograms count returned records, including earlier chain
+links; they are explicitly counts, not a verdict or an effective Gate basis.
+
+## UI-A19 — Current chain actions and frozen Human Confidence
+
+Volume I Result Resolution and the pin's review/reassess API allow only a current
+link. The UI follows recorded resolves references only; it does not compose Contracts,
+infer invalidation or calculate effective Gate state. Returned invalidated_by blocks
+ordinary automated resolution affordances; corrected-Oracle actions are unavailable
+with the UI-5 Requalification reason. Engine currency checks remain authoritative
+if another action occurred since the last read; 403/409 are shown verbatim.
+
+Review captures_confidence comes from returned review_route or the Execution's
+frozen clause, not live configuration. An inconclusive Judge clause without a Human
+capture policy offers no rating field and sends no confidence key. Verdict has no
+default, reason is required, and captured ratings are required finite [0,1]. Pending
+Human completion retains id/recorded_at and is labelled as the one documented
+in-place exception; it is not turned into a fictitious resolution link.
+
+## UI-A20 — Separate simulator control listener
+
+Owner UI-4 requires a loopback control outside the provider protocol. Use a separate
+9101 listener, loopback in development and loopback-published in Compose (private
+container network internally), with a labelled UI proxy. The provider listener never
+accepts control requests. Outage is process-local and starts on at each simulator
+restart; it changes only by explicit control action. Historical Results never change.
 
 ## UI-A13 — Composition field location
 

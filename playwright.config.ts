@@ -3,13 +3,15 @@ import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
 
 process.env.PLAYWRIGHT_BROWSERS_PATH = resolve(".local/browsers");
+process.env.AQEF_CHECK_ADMIN_TOKEN ??= randomBytes(24).toString("hex");
 const env = {
   ...process.env,
-  AQEF_ADMIN_TOKEN: randomBytes(24).toString("hex"),
+  AQEF_ADMIN_TOKEN: process.env.AQEF_CHECK_ADMIN_TOKEN,
 };
 export default defineConfig({
   testDir: "./checks",
   projects: [
+    { name: "ui-4", testMatch: "runs.spec.ts", dependencies: ["ui-3"] },
     { name: "ui-3", testMatch: "oracles.spec.ts", dependencies: ["ui-2"] },
     { name: "ui-1", testMatch: "explorer.spec.ts" },
     {

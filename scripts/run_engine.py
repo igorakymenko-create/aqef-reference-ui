@@ -1,5 +1,6 @@
 """Start the unmodified pinned engine; seed only a missing sample via its REST API."""
 import json
+import hashlib
 import os
 from pathlib import Path
 import signal
@@ -13,8 +14,32 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 
+def local_person_token(token):
+    return hashlib.sha256((token + ':aqef-reference-ui-person-v1').encode()).hexdigest()
+
+def bootstrap_person(base, token):
+    headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+    def call(path, data=None):
+        req = urllib.request.Request(base + path, headers=headers, data=None if data is None else json.dumps(data).encode())
+        try:
+            with urllib.request.urlopen(req, timeout=5) as response: return json.load(response)
+        except urllib.error.HTTPError as exc:
+            if exc.code != 409: raise RuntimeError(f'Local Person bootstrap rejected: HTTP {exc.code}') from None
+    roles = call('/roles?limit=1000')
+    admin = next((r for r in roles if r['name'] == 'admin'), None)
+    if not admin or not {'read', 'execute', 'review'}.issubset(admin['permissions']):
+        raise RuntimeError('Local admin Role lacks sample read/execute/review permissions; no Role weakened or overwritten.')
+    role = next((r for r in roles if r['name'] == 'aster-reviewer'), None)
+    if role is None: call('/roles', {'name': 'aster-reviewer', 'permissions': ['read', 'review']})
+    elif not {'read', 'review'}.issubset(role['permissions']): raise RuntimeError('Existing aster-reviewer Role lacks required permissions')
+    call('/principals', {'id': 'aster-local-person', 'kind': 'person', 'name': 'Local Aster operator', 'roles': ['admin', 'aster-reviewer'], 'token': local_person_token(token)})
+    # Verify the derived credential is accepted without exposing it or updating a Principal.
+    req = urllib.request.Request(base + '/roles?limit=1', headers={'Authorization': 'Bearer ' + local_person_token(token)})
+    urllib.request.urlopen(req, timeout=5).close()
+
 
 def seed(base, token, workspace):
+    bootstrap_person(base, token)
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     data = yaml.safe_load((Path(workspace) / "project.yaml").read_text(encoding="utf-8"))["project"]
     from urllib.parse import quote
