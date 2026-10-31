@@ -1,0 +1,41 @@
+services:
+  engine:
+    build:
+      context: .
+      dockerfile: docker/engine.Dockerfile
+    environment:
+      AQEF_ADMIN_TOKEN: ${AQEF_ADMIN_TOKEN:?Copy .env.example to .env and choose a local token}
+      AQEF_DB_PATH: /data/aqef.db
+    volumes:
+      - engine-data:/data
+      - ./examples/aster:/workspace:ro
+    depends_on:
+      aster-sim:
+        condition: service_healthy
+    ports: ["127.0.0.1:8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "scripts/healthcheck.py"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  aster-sim:
+    build:
+      context: .
+      dockerfile: docker/sim.Dockerfile
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9100/healthz', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  ui:
+    build:
+      context: .
+      dockerfile: docker/ui.Dockerfile
+    environment:
+      AQEF_ADMIN_TOKEN: ${AQEF_ADMIN_TOKEN:?Set the local engine token}
+    depends_on:
+      engine:
+        condition: service_healthy
+    ports: ["127.0.0.1:3000:80"]
+volumes:
+  engine-data:
