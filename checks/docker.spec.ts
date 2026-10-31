@@ -46,10 +46,10 @@ test("nginx serves the built Explorer and the automatically loaded Aster workspa
   await expect(
     page.getByRole("button", { name: "grounded-refund", exact: true }),
   ).toBeVisible();
-  await expect(page.locator("tbody tr")).toHaveCount(12);
+  await expect(page.locator("tbody tr")).toHaveCount(20);
   await page
     .getByRole("textbox", { name: "Search Scenarios" })
-    .fill("unsupported");
+    .fill("unsupported-claim");
   await expect(page.locator("tbody tr")).toHaveCount(1);
   await page
     .getByRole("button", { name: "Inspect unsupported-claim", exact: true })
@@ -68,6 +68,9 @@ test("nginx serves the built Explorer and the automatically loaded Aster workspa
 test("nginx routes health checks to all six simulated providers", async ({
   page,
 }) => {
+  await page.request.post("/sim-control/flaky", {
+    data: { unavailable: true },
+  });
   await page.goto("/#connections");
   await expect(page.getByText("available", { exact: true })).toHaveCount(4);
   await expect(page.getByText("unavailable", { exact: true })).toHaveCount(2);

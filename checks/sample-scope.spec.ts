@@ -18,6 +18,39 @@ const scoped: Record<string, string[]> = {
 test("review sample scope change through shared Apply, run Suite and inspect every Judge property", async ({
   page,
 }) => {
+  const refFile = await (
+    await page.request.get("/workspace/files?path=reference-set.yaml")
+  ).json();
+  const previousRef = parse(refFile.content);
+  if (!["aster-human-labelled", "aster-grounding"].includes(previousRef.name))
+    throw new Error(
+      "Reference Set is owner-authored; inspect before replacing the sample.",
+    );
+  await page.goto("/#workspace");
+  await page
+    .getByRole("button", { name: "reference-set.yaml", exact: true })
+    .click();
+  await page
+    .getByTestId("yaml-editor")
+    .fill(
+      readFileSync("examples/aster/reference-set.yaml", "utf8").replace(
+        /\r\n/g,
+        "\n",
+      ),
+    );
+  await page
+    .getByRole("button", { name: "Review & Apply", exact: true })
+    .click();
+  await expect(
+    page.getByRole("region", { name: "Apply preview" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Confirm Apply", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: /Apply (complete|no changes)/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "project.yaml", exact: true }).click();
   const sample = parse(
     readFileSync("examples/aster/project.yaml", "utf8"),
   ).project;
@@ -37,6 +70,16 @@ test("review sample scope change through shared Apply, run Suite and inspect eve
   const suite = project.suites.find(
     (s: any) => s.name === "support-behaviours",
   );
+  for (const next of sample.suites)
+    if (!project.suites.some((s: any) => s.name === next.name))
+      project.suites.push(next);
+  for (const constraint of general.constraints) {
+    const updated = sample.contracts[0].constraints.find(
+      (c: any) => c.id === constraint.id,
+    );
+    if (updated?.defect_classes)
+      constraint.defect_classes = updated.defect_classes;
+  }
   for (const scenario of sample.suites[0].scenarios)
     if (!suite.scenarios.some((s: any) => s.name === scenario.name))
       suite.scenarios.push(scenario);

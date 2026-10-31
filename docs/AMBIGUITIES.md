@@ -1,4 +1,68 @@
-# Ambiguities and engine gaps — UI-1 / UI-2 / UI-3 / UI-4
+# Ambiguities and engine gaps — UI-1 / UI-2 / UI-3 / UI-4 / UI-5
+
+## UI-A21 — Fixed Evidence for Reference Set scoring
+
+UI-5 asks for fixed-Evidence Scenarios in a dedicated Suite. A.4 and the pinned
+Scenario API permit fixed Evidence only on construction Seeded Controls. Generated
+Admission Suites therefore live in their own explicitly diagnostic Projects, with
+one isolated class per item. Otherwise a diagnostic miss would disqualify the same
+Oracle's product assessments through the engine's control rules. No subject is called.
+The generated YAML is reviewed/applied through Workspace. Its explicit diagnostic
+Confidence threshold 0 collects verdicts without changing the Oracle identity; it
+is visibly distinguished from the Person-declared agreement threshold. Scores use
+actual returned verdicts, never a recomputed disposition. The plan binds an exact
+Oracle, Reference Set snapshot/version and item Evidence; source drift refuses a run.
+
+## UI-A22 — Negative confirmation is refused by this pin
+
+UI-5 D-4 requests true/false confirmation. Volume VIII defines confirmation of actual
+presence/absence; the pin's ConfirmRequest rejects false with 422. The form retains
+both explicit choices and sends the chosen value with a required reason. It shows
+the engine rejection verbatim and leaves an unconfirmed control invalid. It never
+pretends false created an accepted confirmation record. Fixed Evidence/source provenance
+is supported only with construction; Validator/Human confirmation uses captured subject
+Evidence. source_execution alone is not an executable binding: the UI copies an existing
+transcript and Artifacts into FixedEvidence with provenance, refusing repeated Artifact
+names that cannot be losslessly represented by the pin's name→data map.
+
+## UI-A23 — Reference Set provenance and exposure
+
+The sample is an illustrative simulation, not an independently conducted Human
+labelling study. It declares the provisioned local Person as the labeller for local
+review/submission and says so in its provenance and UI note. Independent blind
+labelling, multiple sources, arbitration and separation from tuning remain SHOULDs;
+a single labeller warns without blocking. The sample's exposed item identifies the
+exact tuned Oracle. exposed true without exposed_for excludes it for every Oracle;
+exposed_for accepts exact Oracle strings or explicit model identifiers. No exposure
+is inferred from string similarity. The included/excluded IDs and Reference Set snapshot
+are stored with the declaration. These are workspace conventions, not engine DTO fields.
+
+## UI-A24 — Agreement and incomplete measurements
+
+Only Cohen's κ is supported and is named explicitly. The UI presents the human×Judge
+2×2 table, both marginals, observed/expected agreement, substituted formula and κ.
+Single-class human labels or an undefined denominator produce not_computed and a
+proposed admitted false. Missing Judge verdicts do not disappear from the denominator:
+κ is not_computed, and submission is disabled because this API also requires a numeric
+raw_agreement with no not_computed representation. No value is invented for it.
+verdict_distribution is the distribution of the declared correct Human labels, per
+Volume VI. Threshold changes after viewing are allowed, visibly annotated, and saved
+with Person/time history before submission; the original declaration remains recorded.
+Plans use optimistic file revisions. A newer admitted false record can withdraw an
+earlier status only through a payload satisfying the documented comparison rule.
+
+## UI-A25 — Control scope and requalification affordances
+
+Volume VIII treats undeclared clause classes as covering every tested class. The
+sample's general response/latency Constraints therefore name their own classes, so
+an unsupported-claim defect is not accidentally a missed schema/latency test. Product
+and control Results are presented separately; only returned invalidated_by creates
+an invalidated label/link. Engine blocked_by on not_assessed Results is retained too.
+Accepted Requalification records provide candidate corrected Oracles covering the
+returned classes; the UI does not reimplement freshness, control-kind or compatibility
+validation. This pin checks complete kind coverage again at reassess. A control reused
+from a miss is refused by the API and that refusal remains visible. Full-run invalidation
+is an explicit reason-bearing action and never a silent change to original verdicts.
 
 ## UI-A17 — Local reviewer identity without a current-Principal endpoint
 

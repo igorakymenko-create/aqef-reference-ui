@@ -21,7 +21,10 @@ function oracleLabel(result: Result) {
   let identifier = result.oracle;
   try {
     const oracle = JSON.parse(result.oracle);
-    identifier = oracle.model ?? oracle.name ?? oracle.role ?? result.oracle;
+    identifier =
+      oracle.type === "multi_judge"
+        ? `Multi Judge · ${oracle.configuration?.purpose ?? "purpose not recorded"} · ${oracle.configuration?.consensus?.method ?? "method not recorded"}`
+        : (oracle.model ?? oracle.name ?? oracle.role ?? result.oracle);
   } catch {
     /* Preserve identifiers that the engine does not serialize as JSON. */
   }

@@ -1,4 +1,32 @@
-# Aster simulator — content rules and UI-4 controls
+# Aster simulator — content rules and UI-5 controls
+
+## UI-5 Reference Set and control examples
+
+reference-set.yaml version 2 supplies 20 fixed grounding Conversations, retrieved
+policy sources, declared pass/fail labels and the local labelling Person. These are
+illustrative labels for operator review, not evidence of an independent Human study.
+The balance includes supported paraphrases as well as unsupported dollar amounts.
+One item is exposed to the exact reliable grounding configuration used in the
+instrument example and is excluded for that configuration; its source flag is visible.
+No label or exposure flag enters the provider Evidence sent to a Judge.
+
+instrument-checks contains fixed defect/clean controls for unsupported_claim, tested
+by blind and overcall configurations. Blind misses the wrong amount; overcall raises
+a false alarm on the faithful supported amount. A separate Human-confirmed control
+remains invalid until actual confirmation. Three product Scenarios use blind,
+overcall and reliable respectively. General response/latency Constraints explicitly
+cover their own classes; they do not claim to detect unsupported amounts.
+
+fresh-instrument-checks uses new Conversations and Scenario names with $67.40/$68
+Evidence and the reliable configuration. Run these after the miss, then record a
+Requalification identifying those exact Result IDs and a diagnosis. Freshness is
+checked by the engine against Scenario/source/Conversation exposure and scoring time;
+re-running an exposed original is not a fresh control. A corrected assessment uses
+stored Evidence without calling the subject and appends a new resolves link.
+
+For approximate-amount, the pass/0.6 reply now explains its uncertainty explicitly:
+the approximate amount “about $50” is close to “$49.99” in context, but the exact amount
+was not stated. This changes explanation only; verdict and Confidence are unchanged.
 
 Independent deterministic provider service, Python standard library, no model API,
 credentials, tool execution, external harness or specification test material.

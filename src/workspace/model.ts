@@ -103,6 +103,7 @@ export function parseSource(source: Source): {
       );
     }
     documents.push(data);
+    if(data.admission_plan) continue; // Auditable workflow evidence, never an engine config resource.
     if (data.items && data.labelled_by && data.name && data.version) continue; // Reference Set: auxiliary, not AQEF configuration.
     if (data.project && typeof data.project === "object") {
       resources.push({

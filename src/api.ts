@@ -23,7 +23,7 @@ export type Result = {
   disposition: string;
   verdict: string | null;
   confidence?: number | string;
-  invalidated_by?: string[];
+  invalidated_by?: {scenario:string;defect_class:string}[];
   [key: string]: unknown;
 };
 export type Baseline = {

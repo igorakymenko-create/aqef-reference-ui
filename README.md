@@ -1,10 +1,10 @@
 # AQEF Reference UI
 
-Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-4** adds
-Runs and Evidence (S-8): new batches, frozen Execution detail, resolution chains,
-Human Review and same-Oracle recovery. Connections, Workspace, visual Scenario and
-Oracle designers, and Test Explorer remain available. No `reference_ui` or CTS
-conformance is claimed; UI-5 and UI-6 remain.
+Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-5** adds
+Admission (S-7), Seeded Controls (S-9), control authoring and corrected-Oracle recovery.
+Evidence is readable first, with engine JSON disclosed and frozen configuration last.
+Existing authoring, Connections, Explorer and Runs remain available. No `reference_ui`
+or CTS conformance is claimed; UI-6 remains.
 
 ## Start locally
 
@@ -40,7 +40,7 @@ in the browser is needed. Existing Principals and Roles are not overwritten.
 See [identity limitations and choices](docs/AMBIGUITIES.md#ui-a17--local-reviewer-identity-without-a-current-principal-endpoint).
 
 The workspace service separately seeds an empty `./workspace` from `examples/aster/`.
-Existing files are never overwritten by seeding. To adopt the UI-4 sample in an
+Existing files are never overwritten by seeding. To adopt the UI-5 sample in an
 existing workspace, copy the desired scoped Contract changes from the example into
 the Workspace YAML editor, use **Review & Apply**, inspect the diff, then
 **Confirm Apply**. The [sample scope table](examples/aster/README.md) explains which
@@ -53,6 +53,19 @@ the token used for that database. Do not remove the volume unless you intend to
 discard all local history.
 
 ## What to inspect
+
+* **Admission**: the ordered workflow chooses an exact Oracle and Reference Set version,
+  excludes exposed items, records a Person/time/threshold declaration in workspace,
+  generates a diagnostic fixed-Evidence Suite for shared Review & Apply, then displays
+  every step of Cohen's κ before submitting documented agreement evidence. Threshold
+  changes after results remain allowed and visibly recorded. Accepted records remain
+  in acceptance order; the last for each exact Oracle decides its current status.
+* **Seeded Controls**: inspect recorded batch outcomes, confirmation, per-Oracle Result
+  IDs and linked invalidated Results. Author controls over shared YAML/Apply. Record
+  Human confirmation, explicit full-run invalidation or a diagnosis-backed Requalification
+  using fresh control Results. Corrected assessment appends a new chain link and never
+  calls the subject. The engine accepts/refuses every action. See
+  [trust workflows and API boundaries](docs/TRUST-WORKFLOWS.md).
 
 * **Runs and Evidence**: choose a Suite and Environment explicitly and start a new
   batch, without requesting Gates. Every returned Execution remains listed,
@@ -86,7 +99,7 @@ discard all local history.
   Prompt, Variables/Dataset binding and Constraint/Single Judge clauses. All author
   fields start empty. Every change shows its YAML diff and uses the exact same
   Review & Apply path as the editor; the engine computes the effective Contract.
-* **Test Explorer**: browse Project and Suite definitions, filter twelve Scenarios,
+* **Test Explorer**: browse Project and Suite definitions, filter twenty Scenarios,
   inspect their Contracts, Dataset binding, recorded Baselines, latest Execution,
   its engine Results and frozen Evidence. Entries are grouped by clause and show
   Oracle kind/identifier, disposition, verdict, Confidence/not applicable, recorded
@@ -162,6 +175,10 @@ Admission notices, explicit Multi purpose, both Consensus methods and registry E
 UI-4 checks add new-batch retention, infrastructure failures, Human capture/Role rules,
 resolution chains, outage recovery without subject calls, panel records, verbatim
 preflight/currency errors and pagination across a batch boundary.
+UI-5 adds readable Evidence/panel disclosures, pre-results Admission declarations,
+exposure exclusion, independently checked agreement arithmetic, exact Admission
+payloads and later withdrawal, control authoring, miss/false-alarm/invalid records,
+confirmation refusals, invalidation, fresh Requalification and corrected chains.
 These are independently
 authored checks, **not CTS tests**. Stop the user Compose deployment before the
 development checks because they use the same ports; its database volume is retained.
@@ -171,6 +188,7 @@ servers:
 
 ```sh
 npm run test:e2e -- --config playwright.docker.config.ts
+npm run test:e2e -- --config playwright.trust-docker.config.ts
 ```
 
 These six checks browse the built static UI through nginx, check provider health
@@ -180,6 +198,15 @@ Results and Evidence. UI-4 run controls never request Gates; the retained older
 deployment regression separately checks the pre-existing sample Gate API.
 The checks can be repeated without resetting the database. Compose startup and
 preservation of that history across an engine/UI restart have been verified.
+The second command checks eight UI-5 workflows against the built deployment. It
+records diagnostic Projects, Admission plans and control/recovery history in the
+local workspace/database; it does not add the disposable authoring-test Scenario.
+Each Compose workflow check starts a fresh `ui5-check-<uuid>` sample Project through
+shared Review & Apply: previously exposed controls must not be reused as fresh
+instruments. Existing Aster configuration and all history stay in place.
+For an existing UI-4 sample, review/apply the UI-5 sample additions first; startup
+preserves existing workspace files and engine Projects. The owned-sample migration
+check is `npm run test:e2e -- --config playwright.sample.config.ts`.
 
 To regenerate the engine vendor snapshot from a local engine checkout that contains
 the pinned commit: `python scripts/vendor_engine.py PATH_TO_ENGINE_CHECKOUT`.
@@ -191,7 +218,7 @@ See [implementation and verification](docs/IMPLEMENTATION_NOTES.md),
 
 ## Next slices
 
-UI-5: Admission and Seeded Controls. UI-6: Gates, frozen Reports and live Dashboard.
+UI-6: Gates, frozen Reports and live Dashboard.
 An external reviewer for final inspection remains to be named by the owner; that
 does not block UI-1. No CTS pass or signed inspection is claimed by this build.
 

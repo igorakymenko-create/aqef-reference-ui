@@ -1,5 +1,28 @@
 # Aster: scope checks to the property being exercised
 
+UI-5 adds instrument-checks (six Scenarios) and fresh-instrument-checks (two), bringing
+the sample to 20 Scenarios. The original support-behaviours Suite remains 12.
+The general schema/latency Constraints explicitly name response_structure and
+operational_latency, so they are not mistaken for unsupported_claim detectors.
+
+Run instrument-checks first. Inspect unsupported-defect (blind missed), faithful-clean
+(overcall false_alarm), awaiting-confirmation (invalid until Human confirmation) and
+the linked product Results in Seeded Controls. Original verdicts stay recorded; the
+engine may fail fast with not_assessed instead of invoking a disqualified Oracle.
+Run fresh-instrument-checks after the misses. Select the reliable Oracle and its fresh
+defect/clean Result IDs to record a diagnosis-backed Requalification, then re-assess
+the affected product Results from their Execution pages. The engine decides validity.
+Full-run invalidation is available separately with a reason and explicit broad scope.
+
+reference-set.yaml is version 2 of an illustrative grounding Reference Set: 20 fixed
+Conversations/context sources, a balanced set of declared labels including faithful
+paraphrases, and a local Person attribution for operator review. One exposed item
+identifies the exact tuned Oracle. This is a demonstration, not an independent Human
+labelling study. Admission shows that SHOULD-level limitation, excludes exposed items,
+records the threshold declaration before scoring, and displays every arithmetic step.
+Generated fixed-Evidence diagnostic controls are isolated from the product Project.
+See docs/TRUST-WORKFLOWS.md for the order and pinned-API limitations.
+
 Volume VII's additive Contract Composition applies every clause to every Scenario in
 its scope. The Project Contract contains only response-is-text and response-latency,
 which are meaningful for all responses. Property Expectations are Scenario-local:
