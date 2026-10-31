@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import * as api from "./api";
-import { ResultEntries, ResultEvidence } from "./ResultEntries";
+import { ResultEntries, ResultEvidence, ResultCounts } from "./ResultEntries";
 import { WorkspaceScreen } from "./workspace/WorkspaceScreen";
 import "./style.css";
 
@@ -438,7 +438,7 @@ function Explorer() {
                         </td>
                         <td>
                           {resultList.length ? (
-                            <ResultEntries
+                            <ResultCounts
                               results={resultList}
                               onEvidence={(r) => {
                                 setFocusedResult(r.id);
@@ -578,7 +578,9 @@ function Explorer() {
 
 function App() {
   const route = () =>
-    ["connections", "workspace", "designer"].includes(location.hash.slice(1))
+    ["connections", "workspace", "designer", "validators", "judges"].includes(
+      location.hash.slice(1),
+    )
       ? location.hash.slice(1)
       : "explorer";
   const [page, setPage] = useState(route());
@@ -607,6 +609,15 @@ function App() {
           <a className={page === "designer" ? "active" : ""} href="#designer">
             <span>◇</span>Visual Test Designer
           </a>
+          <a
+            className={page === "validators" ? "active" : ""}
+            href="#validators"
+          >
+            <span>✓</span>Validator Designer
+          </a>
+          <a className={page === "judges" ? "active" : ""} href="#judges">
+            <span>◇</span>Judge Configuration
+          </a>
           <a className={page === "explorer" ? "active" : ""} href="#explorer">
             <span>▦</span>Test Explorer
           </a>
@@ -618,7 +629,7 @@ function App() {
           </a>
         </nav>
         <div className="sidebar-note">
-          <span className="mini-label">STAGE 1 · UI-2</span>
+          <span className="mini-label">STAGE 1 · UI-3</span>
           <p>
             Definitions first.
             <br />
@@ -644,6 +655,8 @@ function App() {
                 connections: "Connections",
                 workspace: "Workspace",
                 designer: "Visual Test Designer",
+                validators: "Validator Designer",
+                judges: "Judge Configuration",
               }[page]
             }
           </span>
@@ -655,9 +668,19 @@ function App() {
           </div>
         </header>
         <main>
-          <div hidden={page !== "workspace" && page !== "designer"}>
+          <div
+            hidden={
+              !["workspace", "designer", "validators", "judges"].includes(page)
+            }
+          >
             <WorkspaceScreen
-              mode={page === "designer" ? "designer" : "workspace"}
+              mode={
+                page === "designer" ||
+                page === "validators" ||
+                page === "judges"
+                  ? page
+                  : "workspace"
+              }
             />
           </div>
           {page === "connections" ? (

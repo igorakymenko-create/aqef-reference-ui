@@ -1,4 +1,43 @@
-# Ambiguities and engine gaps — UI-1 / UI-2
+# Ambiguities and engine gaps — UI-1 / UI-2 / UI-3
+
+## UI-A13 — Composition field location
+
+Owner UI-3 says composition “within a clause”. Volumes V/VII and A.5 define
+`policies.validator_composition` on Contract. The form edits that policy and never
+invents a Constraint-level composition field. Effective composition remains engine-owned.
+
+## UI-A14 — Custom Validator determinism and registration
+
+The engine accepts only its pure closed rule DSL at POST /validators. The form
+requires an explicit non-determinism answer; that answer is not an AQEF YAML field.
+YAML registrations are restricted to the same DSL. Additional rejection signals:
+mapped identifier in Constraint.validator/model/model_version, registry name or
+name@version, registry/rule model/model_version; Confidence keys on Constraint,
+registry or rule; unknown rule operation. Expected data and free prose are not
+searched for model-like strings. A mapped identifier or explicit Yes offers a Judge
+handoff preserving the draft. Unknown identifiers cannot imply a network operation
+in the engine's closed DSL. Registry versions are immutable; changes require a new version.
+
+## UI-A15 — Model family and Admission identity
+
+Exact identity against every Project Environment is mandatory. Engine mapping has
+no family metadata. The warning heuristic lowercases, removes @version, role suffixes
+such as -subject/-judge and trailing vN/date suffixes. It is visibly labelled as a
+heuristic, never a hard refusal or assurance of independence.
+
+The engine has no separately configurable Judge prompt; criteria is the instruction.
+Admission matches its documented http-judge-v1 identity exactly and uses the latest
+append-ordered engine record's admitted flag. No metrics are recomputed. Threshold
+is excluded from identity. Model, criteria or confidence_source changes warn of a
+new configuration in form and preview. A future separate prompt field requires an
+explicit protocol/identity update, not a speculative YAML field here.
+
+## UI-A16 — Sample scope and row counts
+
+Project clauses compose additively, so property Expectations moved to the Scenarios
+that exercise them. Historical Evidence is preserved. Counts are a histogram of
+returned disposition/verdict pairs, with invalidation shown separately; they are
+not a Scenario verdict or ranking and never feed a quality decision in the UI.
 
 UI-2 entries below record owner amendments and implementation choices; no engine
 behaviour or historical records are changed.

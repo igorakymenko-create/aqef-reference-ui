@@ -1,4 +1,6 @@
 import { EngineError } from "../api";
+import { providers } from "../api";
+import { oracleChecks, judgeChangeWarnings } from "./oracleRules";
 import {
   assemble,
   canonical,
@@ -38,10 +40,15 @@ export const writeFile = (source: Source) =>
 export const readAll = async () =>
   Promise.all((await fileNames()).map(readFile));
 const enc = encodeURIComponent;
-async function all(path: string): Promise<Data[]> {
+export async function all(
+  path: string,
+  reads?: { path: string; value: any }[],
+): Promise<Data[]> {
   const records: Data[] = [];
   for (let offset = 0; ; offset += 100) {
-    const page = await json(`${path}?limit=100&offset=${offset}`);
+    const url = `${path}?limit=100&offset=${offset}`;
+    const page = await json(url);
+    reads?.push({ path: url, value: page });
     if (!Array.isArray(page)) throw new Error("Expected engine collection");
     records.push(...page);
     if (page.length < 100) return records;
@@ -68,6 +75,7 @@ export type Plan = {
   operations: Operation[];
   reads: { path: string; value: any }[];
   issues: string[];
+  warnings: string[];
 };
 const projectPath = (name: string) => "/api/projects/" + enc(name);
 
@@ -110,15 +118,29 @@ function inventory(
 }
 export async function makePlan(sources: Source[]): Promise<Plan> {
   const workspace = assemble(sources);
+  const rules = oracleChecks(
+    workspace.roots,
+    workspace.resources,
+    await providers(),
+  );
+  if (rules.blocks.length)
+    throw new Error(
+      "Apply refused before saving YAML or making engine writes:\n" +
+        rules.blocks.join("\n"),
+    );
+  const warnings = [...rules.warnings];
   const changes: Change[] = [],
     operations: Operation[] = [],
     reads: Plan["reads"] = [];
   for (const [name, wanted] of workspace.roots) {
     const path = projectPath(name);
     const current = await json(path, undefined, true);
+    warnings.push(...judgeChangeWarnings(current, wanted));
     reads.push({ path, value: current });
     const external = workspace.resources.filter(
-      (r) => r.project === name && ["Contract", "Dataset"].includes(r.type),
+      (r) =>
+        r.project === name &&
+        ["Contract", "Dataset", "Validator"].includes(r.type),
     );
     const rootChanged = !equal("Project", current, wanted);
     const finalCall = `${current ? "PUT" : external.length ? "PUT" : "POST"} ${current || external.length ? path : "/api/projects"}`;
@@ -199,18 +221,13 @@ export async function makePlan(sources: Source[]): Promise<Plan> {
         ]),
       ).values(),
     ];
-    const ordered =
-      typeof pending.sort === "function"
-        ? pending.sort((a, b) =>
-            a.type === "Dataset" && b.type !== "Dataset"
-              ? -1
-              : b.type === "Dataset" && a.type !== "Dataset"
-                ? 1
-                : 0,
-          )
-        : pending;
-    const done = new Set<string>();
-    for (let index = 0; ordered.length; ) {
+    const rank: Record<string, number> = {
+      Dataset: 0,
+      Validator: 1,
+      Contract: 2,
+    };
+    const ordered = pending.sort((a, b) => rank[a.type] - rank[b.type]);
+    while (ordered.length) {
       const candidate = ordered.findIndex((r) =>
         r.type === "Dataset"
           ? !r.value.base_dataset ||
@@ -233,16 +250,36 @@ export async function makePlan(sources: Source[]): Promise<Plan> {
           "Cyclic reusable resource dependencies; no calls issued",
         );
       const r = ordered.splice(candidate, 1)[0];
-      index++;
       const collection =
-        path + (r.type === "Contract" ? "/contracts" : "/datasets");
+        path +
+        (r.type === "Contract"
+          ? "/contracts"
+          : r.type === "Validator"
+            ? "/validators"
+            : "/datasets");
       const resourcePath =
         collection +
         "/" +
         enc(r.value.name) +
         (r.type === "Dataset" ? "?version=" + enc(r.value.version) : "");
-      const old = current ? await json(resourcePath, undefined, true) : null;
-      if (current) reads.push({ path: resourcePath, value: old });
+      const old =
+        r.type === "Validator"
+          ? current
+            ? ((await all(collection, reads)).find(
+                (v) => v.name === r.value.name && v.version === r.value.version,
+              ) ?? null)
+            : null
+          : current
+            ? await json(resourcePath, undefined, true)
+            : null;
+      if (current && r.type !== "Validator")
+        reads.push({ path: resourcePath, value: old });
+      if (r.type === "Contract")
+        warnings.push(
+          ...judgeChangeWarnings(old ? { contracts: [old] } : null, {
+            contracts: [r.value],
+          }),
+        );
       const kind =
         old === null
           ? "created"
@@ -252,9 +289,9 @@ export async function makePlan(sources: Source[]): Promise<Plan> {
       const method = r.type === "Contract" && old ? "PUT" : "POST";
       const target = method === "PUT" ? resourcePath : collection;
       changes.push({
-        resource: `${name} · Reusable ${r.type}/${r.value.name}${r.type === "Dataset" ? "@" + r.value.version : ""}`,
+        resource: `${name} · Reusable ${r.type}/${r.value.name}${["Dataset", "Validator"].includes(r.type) ? "@" + r.value.version : ""}`,
         kind,
-        governed: r.type === "Contract",
+        governed: ["Contract", "Validator"].includes(r.type),
         diff:
           kind === "unchanged"
             ? ""
@@ -267,13 +304,12 @@ export async function makePlan(sources: Source[]): Promise<Plan> {
           method,
           path: target,
           body: r.value,
-          governed: r.type === "Contract",
+          governed: ["Contract", "Validator"].includes(r.type),
           note:
             r.type === "Dataset" && old
               ? "Dataset versions are immutable; the engine will decide this request."
               : undefined,
         });
-      done.add(r.value.name);
     }
     if (rootChanged)
       operations.push({
@@ -284,7 +320,14 @@ export async function makePlan(sources: Source[]): Promise<Plan> {
         governed: governed(wanted) || Boolean(current && governed(current)),
       });
   }
-  return { sources, changes, operations, reads, issues: workspace.issues };
+  return {
+    sources,
+    changes,
+    operations,
+    reads,
+    issues: workspace.issues,
+    warnings: [...new Set(warnings)],
+  };
 }
 export type Outcome = {
   call: string;
@@ -297,6 +340,13 @@ export async function applyPlan(
 ): Promise<{ state: string; outcomes: Outcome[] }> {
   const outcomes: Outcome[] = [];
   try {
+    const assembled = assemble(plan.sources);
+    const policy = oracleChecks(
+      assembled.roots,
+      assembled.resources,
+      await providers(),
+    );
+    if (policy.blocks.length) throw new Error(policy.blocks.join("\n"));
     // A preview expires if either its source files or its engine read set changed.
     const disk = await readAll();
     if (
@@ -409,6 +459,7 @@ export async function exportEngine(sources: Source[]): Promise<Source[]> {
     const root = await json(projectPath(name));
     const contracts = await all(projectPath(name) + "/contracts");
     const datasets = await all(projectPath(name) + "/datasets");
+    const validators = await all(projectPath(name) + "/validators");
     const projectSource = workspace.resources.find(
       (r) => r.project === name && r.type === "Project",
     )!;
@@ -428,6 +479,10 @@ export async function exportEngine(sources: Source[]): Promise<Source[]> {
         value = datasets.find(
           (d) => d.name === r.value.name && d.version === r.value.version,
         );
+      if (r.type === "Validator")
+        value = validators.find(
+          (v) => v.name === r.value.name && v.version === r.value.version,
+        );
       if (r.type === "Environment")
         value = root.environments.find((e: Data) => e.name === r.value.name);
       if (r.type === "Suite")
@@ -445,6 +500,7 @@ export async function exportEngine(sources: Source[]): Promise<Source[]> {
       const key = {
         Contract: "contract",
         Dataset: "dataset",
+        Validator: "validator",
         Environment: "environment",
         Suite: "suite",
         Scenario: "scenario",
@@ -488,6 +544,17 @@ export async function exportEngine(sources: Source[]): Promise<Source[]> {
         )
       )
         extra.push({ project: name, dataset });
+    for (const validator of validators)
+      if (
+        !workspace.resources.some(
+          (r) =>
+            r.project === name &&
+            r.type === "Validator" &&
+            r.value.name === validator.name &&
+            r.value.version === validator.version,
+        )
+      )
+        extra.push({ project: name, validator });
     if (extra.length) (source as any).exports.push(...extra);
   }
   for (const source of result.values())

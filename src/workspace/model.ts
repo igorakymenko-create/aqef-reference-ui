@@ -125,6 +125,7 @@ export function parseSource(source: Source): {
       suite: "Suite",
       scenario: "Scenario",
       quality_gate: "QualityGate",
+      validator: "CustomValidator",
     };
     const key = Object.keys(kinds).find(
       (key) => data[key] && typeof data[key] === "object",
@@ -135,7 +136,7 @@ export function parseSource(source: Source): {
         `${source.path}: a Scenario document needs its Suite name`,
       );
     resources.push({
-      type: kinds[key],
+      type: kinds[key] === "CustomValidator" ? "Validator" : kinds[key],
       project: data.project,
       suite: typeof data.suite === "string" ? data.suite : undefined,
       value: data[key],
@@ -264,7 +265,10 @@ export function assemble(sources: Source[]) {
     if (!found) list.push(structuredClone(value));
   }
   for (const r of resources.filter(
-    (r) => !["Project", "Contract", "Dataset", "Scenario"].includes(r.type),
+    (r) =>
+      !["Project", "Contract", "Dataset", "Scenario", "Validator"].includes(
+        r.type,
+      ),
   )) {
     const root = roots.get(r.project);
     if (!root) throw new Error(`Missing Project document: ${r.project}`);

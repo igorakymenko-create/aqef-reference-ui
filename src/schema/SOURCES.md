@@ -1,5 +1,10 @@
 # Authoring schema provenance
 
+UI-3 additionally uses Volumes V/VI/XV for mandatory Oracle authoring rules and
+the pinned engine's documented `/validators` API for the CustomValidator transport
+definition. This implementation-specific definition is separate from normative
+AQEF configuration types. It allows only the documented closed pure rule language.
+
 `authoring.json` is an authoring subset transcribed by
 `scripts/derive_authoring_schema.py` from the AQEF **1.0-CR1** specification prose:
 

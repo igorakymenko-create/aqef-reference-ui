@@ -551,7 +551,8 @@
         "target",
         "expected"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Volume V / XV: a Validator MUST NOT carry a Confidence value or threshold."
     },
     "Expectation": {
       "type": "object",
@@ -863,7 +864,8 @@
             }
           }
         }
-      ]
+      ],
+      "description": "Volume VI / XV / A.7: purpose MUST be explicitly independence or stability."
     },
     "ConsensusConfig": {
       "type": "object",
@@ -1344,6 +1346,108 @@
           }
         }
       ]
+    },
+    "CustomValidator": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.-]+$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.-]+$"
+        },
+        "rule": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "const": "equals"
+                },
+                "expected": {}
+              },
+              "required": [
+                "operation",
+                "expected"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "const": "schema"
+                },
+                "expected": {}
+              },
+              "required": [
+                "operation",
+                "expected"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "const": "forbidden-content"
+                },
+                "expected": {}
+              },
+              "required": [
+                "operation",
+                "expected"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "const": "structural"
+                },
+                "expected": {}
+              },
+              "required": [
+                "operation",
+                "expected"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "const": "range"
+                },
+                "minimum": {
+                  "type": "number"
+                },
+                "maximum": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "operation",
+                "minimum",
+                "maximum"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "rule"
+      ],
+      "additionalProperties": false,
+      "description": "Volume V / XV deterministic Validator; declarative registry request from pinned docs/API.md. No Confidence field."
     }
   }
 }

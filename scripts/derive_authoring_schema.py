@@ -53,6 +53,12 @@ prior = {'difficulty_prior':{'anyOf':[F,{'const':'not_established'}]},'prior_bas
 provenance = {'if':{'properties':{'difficulty_prior':{'type':'number'}},'required':['difficulty_prior']},'then':{'required':['prior_basis','prior_source']}}
 obj('DefectClassConfig', {'name':S,**prior}, ['name'], allOf=[provenance])
 obj('SeededControlConfig', {'kind':enum('defect','clean'),'defect_class':S,**prior,'planted_defect':{},'confirmed_by':enum('validator','human_reviewer','construction'),'confirmation':ref('Constraint'),'generator':S}, ['defect_class','confirmed_by'], allOf=[provenance,{'if':when('kind','clean'),'then':prohibit('planted_defect','difficulty_prior','prior_basis','prior_source','reference_oracles'),'else':{'required':['planted_defect']}},{'if':when('confirmed_by','validator'),'then':{'required':['confirmation']},'else':prohibit('confirmation')}])
+customRules = [{'type':'object','properties':{'operation':{'const':operation},'expected':{}},'required':['operation','expected'],'additionalProperties':False} for operation in ['equals','schema','forbidden-content','structural']]
+customRules.append({'type':'object','properties':{'operation':{'const':'range'},'minimum':{'type':'number'},'maximum':{'type':'number'}},'required':['operation','minimum','maximum'],'additionalProperties':False})
+obj('CustomValidator', {'name':{'type':'string','minLength':1,'pattern':'^[A-Za-z0-9_.-]+$'},'version':{'type':'string','minLength':1,'pattern':'^[A-Za-z0-9_.-]+$'},'rule':{'oneOf':customRules}}, ['name','version','rule'])
+D['CustomValidator']['description']='Volume V / XV deterministic Validator; declarative registry request from pinned docs/API.md. No Confidence field.'
+D['Constraint']['description']='Volume V / XV: a Validator MUST NOT carry a Confidence value or threshold.'
+D['MultiJudgeConfig']['description']='Volume VI / XV / A.7: purpose MUST be explicitly independence or stability.'
 schema = {'$schema':'http://json-schema.org/draft-07/schema#','$id':'https://aqef.local/schemas/authoring-1.0-CR1.json','title':'AQEF 1.0-CR1 authoring subset (pinned engine capabilities)','description':'Manually derived from A.1-A.10 and B.2; no runtime-schema or full B.1 conformance claim. B.3 is engine-authoritative. No defaults inserted.','definitions':D}
 target=Path(__file__).resolve().parents[1]/'src/schema/authoring.json'
 target.parent.mkdir(parents=True,exist_ok=True)

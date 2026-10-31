@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Designer } from "./Designer";
 import { YamlEditor } from "./YamlEditor";
 import { FileTree } from "./FileTree";
+import { ValidatorDesigner } from "./ValidatorDesigner";
+import { JudgeDesigner } from "./JudgeDesigner";
+import { oracleChecks } from "./oracleRules";
+import { providers as readProviders } from "../api";
+import type { Data } from "./model";
 import {
   assemble,
   diffText,
@@ -18,7 +23,15 @@ import {
   type Plan,
 } from "./api";
 
-export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
+export function WorkspaceScreen({
+  mode,
+}: {
+  mode: "workspace" | "designer" | "validators" | "judges";
+}) {
+  const [providerMap, setProviderMap] = useState<Record<string, string>>({}),
+    [handoff, setHandoff] = useState<Data>();
+  const previousMode = useRef(mode),
+    loadSequence = useRef(0);
   const [sources, setSources] = useState<Source[]>([]),
     [active, setActive] = useState(""),
     [draft, setDraft] = useState("");
@@ -32,7 +45,7 @@ export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
     [busy, setBusy] = useState(false),
     [generation, setGeneration] = useState(0);
   const original = sources.find((s) => s.path === active);
-  const effective = mode === "designer" ? (visual ?? draft) : draft;
+  const effective = mode !== "workspace" ? (visual ?? draft) : draft;
   const editedSources = useMemo(
     () =>
       sources.map((s) =>
@@ -42,22 +55,38 @@ export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
   );
   const validation = useMemo(() => {
     try {
-      return { issues: assemble(editedSources).issues, sensitive: false };
+      const assembled = assemble(editedSources),
+        checks = oracleChecks(
+          assembled.roots,
+          assembled.resources,
+          providerMap,
+        );
+      return {
+        issues: [...assembled.issues, ...checks.blocks],
+        sensitive: false,
+        roots: assembled.roots,
+        warnings: checks.warnings,
+      };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       return {
         issues: [message],
         sensitive: message.includes("Sensitive key") || secretKeys(effective),
+        roots: new Map<string, Data>(),
+        warnings: [] as string[],
       };
     }
-  }, [editedSources]);
+  }, [editedSources, providerMap]);
   const sensitive =
     validation.sensitive || formError.startsWith("Sensitive key");
   async function reload(path = active) {
+    const sequence = ++loadSequence.current;
     setBusy(true);
     setError("");
     try {
-      const files = await readAll();
+      const [files, mapping] = await Promise.all([readAll(), readProviders()]);
+      if (sequence !== loadSequence.current) return;
+      setProviderMap(mapping);
       setSources(files);
       const file =
         files.find((f) => f.path === path) ??
@@ -72,22 +101,31 @@ export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setBusy(false);
+      if (sequence === loadSequence.current) setBusy(false);
     }
   }
   useEffect(() => {
     void reload();
   }, []);
   useEffect(() => {
-    if (mode === "workspace" && visual !== undefined) {
-      setDraft(visual);
-      setVisual(undefined);
+    if (previousMode.current !== mode) {
+      if (visual !== undefined) {
+        setDraft(visual);
+        setVisual(undefined);
+      }
+      setFormError("");
+      setGeneration((value) => value + 1);
+      previousMode.current = mode;
     }
     setPlan(undefined);
   }, [mode]);
   useEffect(() => {
     setPlan(undefined);
-  }, [effective]);
+  }, [effective, formError]);
+  const handleFormError = useCallback((message: string) => {
+    setFormError(message);
+    if (message) setVisual(undefined);
+  }, []);
   useEffect(() => {
     const listener = (event: BeforeUnloadEvent) => {
       if (original && effective !== original.content) {
@@ -117,12 +155,13 @@ export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
     setError("");
     setOutcomes([]);
     setState("");
+    setPlan(undefined);
     try {
       if (sensitive)
         throw new Error(
           "Use secret_ref; sensitive draft content is hidden and cannot be saved or applied.",
         );
-      if (!exporting && mode === "designer" && formError)
+      if (!exporting && mode !== "workspace" && formError)
         throw new Error(formError);
       const candidate = exporting ? await exportEngine(sources) : editedSources;
       const next = await makePlan(candidate);
@@ -158,13 +197,24 @@ export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
   }
   const yamlDiff = sensitive
     ? "Sensitive draft hidden; use secret_ref."
-    : diffText(original?.content ?? "", effective);
+    : mode !== "workspace" && formError
+      ? formError
+      : diffText(original?.content ?? "", effective);
   return (
     <>
       <div className="page-heading">
         <div>
           <p className="eyebrow">AUTHORING / YAML SOURCE OF TRUTH</p>
-          <h1>{mode === "designer" ? "Visual Test Designer" : "Workspace"}</h1>
+          <h1>
+            {
+              {
+                workspace: "Workspace",
+                designer: "Visual Test Designer",
+                validators: "Validator Designer",
+                judges: "Judge Configuration",
+              }[mode]
+            }
+          </h1>
           <p className="lede">
             Propose YAML. Review the diff. Let the engine decide.
           </p>
@@ -232,7 +282,30 @@ export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
               key={`${active}:${generation}`}
               content={draft}
               onChange={setVisual}
-              onError={setFormError}
+              onError={handleFormError}
+            />
+          ) : mode === "validators" ? (
+            <ValidatorDesigner
+              key={`${active}:${generation}`}
+              content={draft}
+              roots={validation.roots}
+              providers={providerMap}
+              onChange={setVisual}
+              onError={handleFormError}
+              onHandoff={(data) => {
+                setHandoff(data);
+                window.location.hash = "judges";
+              }}
+            />
+          ) : mode === "judges" ? (
+            <JudgeDesigner
+              key={`${active}:${generation}`}
+              content={draft}
+              roots={validation.roots}
+              providers={providerMap}
+              onChange={setVisual}
+              onError={handleFormError}
+              prefill={handoff}
             />
           ) : (
             <YamlEditor value={draft} onChange={setDraft} />
@@ -254,7 +327,7 @@ export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
                 ))}
               </ul>
             )}
-            {mode === "designer" && formError && <p>{formError}</p>}
+            {mode !== "workspace" && formError && <p>{formError}</p>}
             {/action_boundary:|validator:\s*(boundary|tool-call)/.test(
               effective,
             ) && (
@@ -290,7 +363,7 @@ export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
               busy ||
               !active ||
               sensitive ||
-              (mode === "designer" && Boolean(formError))
+              (mode !== "workspace" && Boolean(formError))
             }
             onClick={() => preview()}
           >
@@ -300,12 +373,18 @@ export function WorkspaceScreen({ mode }: { mode: "workspace" | "designer" }) {
       </div>
       {error && (
         <div className="error" role="alert">
+          <strong>Apply preview refused</strong>
           <pre>{error}</pre>
         </div>
       )}
       {plan && (
         <section className="apply-preview" aria-label="Apply preview">
           <h2>{intent === "export" ? "Export preview" : "Apply preview"}</h2>
+          {plan.warnings.map((warning, index) => (
+            <p key={index} className="notice" role="note">
+              {warning}
+            </p>
+          ))}
           <p>
             {plan.changes.filter((c) => c.kind !== "unchanged").length} changed
             or created resources · {plan.operations.length} engine calls. No

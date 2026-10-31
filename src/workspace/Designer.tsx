@@ -169,14 +169,38 @@ export function Designer({
       );
       return;
     }
-    if (!source || !suite) {
-      onError("Choose a Project document and a Suite.");
+    const missing: string[] = [];
+    if (!source) missing.push("Project document");
+    if (!suite) missing.push("Suite");
+    if (!name.trim()) missing.push("Scenario name");
+    if (!prompt.trim()) missing.push("Prompt template");
+    if (!binding) missing.push("Variables / Dataset binding");
+    if (!contractMode) missing.push("Contract source");
+    if (binding === "variables" && !variables.trim())
+      missing.push("Variables mapping");
+    if (binding === "dataset" && !dataset.trim())
+      missing.push("Dataset reference");
+    if (contractMode === "reference" && !reference.trim())
+      missing.push("Reusable Contract name");
+    if (contractMode === "inline" && !clauses.length)
+      missing.push("at least one Contract clause");
+    if (contractMode === "inline")
+      clauses.forEach((clause, index) => {
+        const fields =
+          clause.kind === "constraint"
+            ? ["validator", "target", "expected"]
+            : ["criteria", "model", "confidenceSource", "threshold"];
+        for (const field of fields)
+          if (!String(clause[field as keyof Clause]).trim())
+            missing.push(`clause ${index + 1} ${field}`);
+      });
+    if (missing.length) {
+      onError(
+        `Form incomplete — choose: ${missing.join(", ")}. No YAML is proposed yet.`,
+      );
       return;
     }
-    if (!name && !prompt && !binding && !contractMode) {
-      onError("Fill the Scenario fields; no authoring defaults are inserted.");
-      return;
-    }
+    if (!source || !suite) return;
     try {
       if (original.seeded_control || original.evidence)
         throw new Error(
