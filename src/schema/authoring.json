@@ -1,0 +1,1349 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aqef.local/schemas/authoring-1.0-CR1.json",
+  "title": "AQEF 1.0-CR1 authoring subset (pinned engine capabilities)",
+  "description": "Manually derived from A.1-A.10 and B.2; no runtime-schema or full B.1 conformance claim. B.3 is engine-authoritative. No defaults inserted.",
+  "definitions": {
+    "Project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "environments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Environment"
+          },
+          "minItems": 1
+        },
+        "suites": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Suite"
+          },
+          "minItems": 0
+        },
+        "execution": {
+          "$ref": "#/definitions/ExecutionConfig"
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Dataset"
+          },
+          "minItems": 0
+        },
+        "defect_classes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DefectClassConfig"
+          },
+          "minItems": 0
+        },
+        "contracts": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/Contract"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          },
+          "minItems": 0
+        },
+        "quality_gates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QualityGate"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "name",
+        "environments"
+      ],
+      "additionalProperties": false
+    },
+    "Environment": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tool_configuration": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ToolConfig"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "action_boundary": {
+          "$ref": "#/definitions/ActionBoundary"
+        },
+        "infra_target": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "name",
+        "model_version",
+        "prompt_version",
+        "tool_configuration",
+        "infra_target"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "tool_configuration": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "tool_configuration"
+            ]
+          },
+          "then": {
+            "required": [
+              "action_boundary"
+            ]
+          }
+        }
+      ]
+    },
+    "ToolConfig": {
+      "type": "object",
+      "properties": {
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ToolDef"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "tools"
+      ],
+      "additionalProperties": false
+    },
+    "ToolDef": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parameters": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    "ActionBoundary": {
+      "type": "object",
+      "properties": {
+        "enforced": {
+          "type": "boolean"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BoundaryEntry"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "enforced",
+        "entries"
+      ],
+      "additionalProperties": false
+    },
+    "BoundaryEntry": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "stub",
+            "sandbox",
+            "real"
+          ]
+        },
+        "tripwire": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "target",
+        "kind"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "tripwire": {
+                "const": true
+              }
+            },
+            "required": [
+              "tripwire"
+            ]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "stub"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        }
+      ]
+    },
+    "Suite": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Scenario"
+          },
+          "minItems": 1
+        },
+        "contracts": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/Contract"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          },
+          "minItems": 0
+        },
+        "quality_gates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QualityGate"
+          },
+          "minItems": 0
+        },
+        "execution": {
+          "$ref": "#/definitions/ExecutionConfig"
+        }
+      },
+      "required": [
+        "name",
+        "scenarios"
+      ],
+      "additionalProperties": false
+    },
+    "PromptDef": {
+      "type": "object",
+      "properties": {
+        "template": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "template"
+      ],
+      "additionalProperties": false
+    },
+    "Scenario": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Contract"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "prompt": {
+          "$ref": "#/definitions/PromptDef"
+        },
+        "dataset": {
+          "type": "string",
+          "pattern": "^.+@.+$"
+        },
+        "variables": {
+          "type": "object"
+        },
+        "seeded_control": {
+          "$ref": "#/definitions/SeededControlConfig"
+        },
+        "evidence": {
+          "$ref": "#/definitions/FixedEvidence"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "not": {
+            "required": [
+              "dataset",
+              "variables"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "seeded_control": {
+                "properties": {
+                  "confirmed_by": {
+                    "const": "construction"
+                  }
+                },
+                "required": [
+                  "confirmed_by"
+                ]
+              }
+            },
+            "required": [
+              "seeded_control"
+            ]
+          },
+          "then": {
+            "required": [
+              "evidence"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "prompt"
+                  ]
+                },
+                {
+                  "required": [
+                    "dataset"
+                  ]
+                },
+                {
+                  "required": [
+                    "variables"
+                  ]
+                }
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "prompt"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "evidence"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "FixedEvidence": {
+      "type": "object",
+      "properties": {
+        "conversation": {
+          "$ref": "#/definitions/Conversation"
+        },
+        "artifacts": {
+          "type": "object"
+        },
+        "source_execution": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "conversation"
+      ],
+      "additionalProperties": false
+    },
+    "Conversation": {
+      "type": "object",
+      "properties": {
+        "turns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Turn"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "turns"
+      ],
+      "additionalProperties": false
+    },
+    "Turn": {
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": "string"
+        },
+        "response": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "prompt",
+        "response"
+      ],
+      "additionalProperties": false
+    },
+    "Contract": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Constraint"
+          },
+          "minItems": 0
+        },
+        "expectations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Expectation"
+          },
+          "minItems": 0
+        },
+        "policies": {
+          "$ref": "#/definitions/Policies"
+        },
+        "extends": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "constraints"
+          ],
+          "properties": {
+            "constraints": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "expectations"
+          ],
+          "properties": {
+            "expectations": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "Constraint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dimension": {
+          "type": "string",
+          "enum": [
+            "functional",
+            "semantic",
+            "operational",
+            "safety"
+          ]
+        },
+        "defect_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "validator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected": {},
+        "veto": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "validator",
+        "target",
+        "expected"
+      ],
+      "additionalProperties": false
+    },
+    "Expectation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dimension": {
+          "type": "string",
+          "enum": [
+            "functional",
+            "semantic",
+            "operational",
+            "safety"
+          ]
+        },
+        "defect_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "criteria": {
+          "type": "string",
+          "minLength": 1
+        },
+        "judge": {
+          "$ref": "#/definitions/JudgeConfig"
+        },
+        "multi_judge": {
+          "$ref": "#/definitions/MultiJudgeConfig"
+        },
+        "human_reviewer": {
+          "$ref": "#/definitions/HumanReviewerConfig"
+        },
+        "confidence_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "review_timeout": {
+          "type": "string",
+          "minLength": 1
+        },
+        "on_timeout": {
+          "type": "string",
+          "enum": [
+            "block",
+            "escalate"
+          ]
+        },
+        "escalate_to": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "criteria"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "judge"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "multi_judge"
+                ]
+              },
+              {
+                "required": [
+                  "human_reviewer"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "required": [
+            "multi_judge"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "judge"
+                ]
+              },
+              {
+                "required": [
+                  "human_reviewer"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "required": [
+            "human_reviewer"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "judge"
+                ]
+              },
+              {
+                "required": [
+                  "multi_judge"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "anyOf": [
+              {
+                "required": [
+                  "judge"
+                ]
+              },
+              {
+                "required": [
+                  "multi_judge"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "required": [
+              "confidence_threshold"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "on_timeout": {
+                "const": "escalate"
+              }
+            },
+            "required": [
+              "on_timeout"
+            ]
+          },
+          "then": {
+            "required": [
+              "escalate_to"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "escalate_to"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "Policies": {
+      "type": "object",
+      "properties": {
+        "validator_composition": {
+          "type": "string",
+          "enum": [
+            "AND",
+            "OR",
+            "hard-veto"
+          ]
+        },
+        "weight": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "JudgeConfig": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence_source": {
+          "type": "string",
+          "enum": [
+            "self_rating",
+            "token_probability",
+            "agreement"
+          ]
+        }
+      },
+      "required": [
+        "model",
+        "confidence_source"
+      ],
+      "additionalProperties": false
+    },
+    "HumanReviewerConfig": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captures_confidence": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "MultiJudgeConfig": {
+      "type": "object",
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "enum": [
+            "independence",
+            "stability"
+          ]
+        },
+        "judges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JudgeConfig"
+          },
+          "minItems": 2
+        },
+        "judge": {
+          "$ref": "#/definitions/JudgeConfig"
+        },
+        "samples": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "consensus": {
+          "$ref": "#/definitions/ConsensusConfig"
+        }
+      },
+      "required": [
+        "purpose",
+        "consensus"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "purpose": {
+                "const": "independence"
+              }
+            },
+            "required": [
+              "purpose"
+            ]
+          },
+          "then": {
+            "required": [
+              "judges"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "judge"
+                  ]
+                },
+                {
+                  "required": [
+                    "samples"
+                  ]
+                }
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "judge",
+              "samples"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "judges"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "ConsensusConfig": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "majority",
+                "unanimous"
+              ]
+            },
+            {
+              "type": "number",
+              "exclusiveMinimum": 0.5,
+              "maximum": 1
+            }
+          ]
+        },
+        "min_agreement": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "on_disagreement": {
+          "type": "string",
+          "enum": [
+            "human_review",
+            "fail"
+          ]
+        },
+        "min_qualified": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "method"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "not": {
+              "properties": {
+                "method": {
+                  "const": "voting"
+                }
+              },
+              "required": [
+                "method"
+              ]
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "threshold"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "Dataset": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "static"
+          ]
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Row"
+          },
+          "minItems": 0
+        },
+        "base_dataset": {
+          "type": "string",
+          "pattern": "^.+@.+$"
+        },
+        "mechanisms": {
+          "type": "array",
+          "maxItems": 0
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "source",
+        "rows"
+      ],
+      "additionalProperties": false
+    },
+    "Row": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "variables": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "variables"
+      ],
+      "additionalProperties": false
+    },
+    "ExecutionConfig": {
+      "type": "object",
+      "properties": {
+        "timeout": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retry": {
+          "$ref": "#/definitions/RetryConfig"
+        },
+        "scheduling": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parallelization": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "on_seeded_control_miss": {
+          "type": "string",
+          "enum": [
+            "skip_class",
+            "halt_run"
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "RetryConfig": {
+      "type": "object",
+      "properties": {
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "on": {
+          "const": "infrastructure_failure"
+        }
+      },
+      "required": [
+        "max_attempts",
+        "on"
+      ],
+      "additionalProperties": false
+    },
+    "QualityGate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "aggregate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        },
+        "compare_against": {
+          "type": "string",
+          "minLength": 1
+        },
+        "min_basis": {
+          "$ref": "#/definitions/MinBasis"
+        },
+        "on_failure": {
+          "type": "string",
+          "enum": [
+            "block_release",
+            "warn"
+          ]
+        },
+        "override_requires": {
+          "type": "string",
+          "minLength": 1
+        },
+        "require_admitted_judges": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "aggregate",
+        "threshold",
+        "on_failure"
+      ],
+      "additionalProperties": false
+    },
+    "MinBasis": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scenarios": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "results"
+          ]
+        },
+        {
+          "required": [
+            "scenarios"
+          ]
+        }
+      ]
+    },
+    "DefectClassConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "difficulty_prior": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "const": "not_established"
+            }
+          ]
+        },
+        "prior_basis": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "prior_source": {
+          "type": "string",
+          "enum": [
+            "reference_oracles",
+            "human_reviewer"
+          ]
+        },
+        "reference_oracles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JudgeConfig"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "difficulty_prior": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "difficulty_prior"
+            ]
+          },
+          "then": {
+            "required": [
+              "prior_basis",
+              "prior_source"
+            ]
+          }
+        }
+      ]
+    },
+    "SeededControlConfig": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "defect",
+            "clean"
+          ]
+        },
+        "defect_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "difficulty_prior": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "const": "not_established"
+            }
+          ]
+        },
+        "prior_basis": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "prior_source": {
+          "type": "string",
+          "enum": [
+            "reference_oracles",
+            "human_reviewer"
+          ]
+        },
+        "reference_oracles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JudgeConfig"
+          },
+          "minItems": 0
+        },
+        "planted_defect": {},
+        "confirmed_by": {
+          "type": "string",
+          "enum": [
+            "validator",
+            "human_reviewer",
+            "construction"
+          ]
+        },
+        "confirmation": {
+          "$ref": "#/definitions/Constraint"
+        },
+        "generator": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "defect_class",
+        "confirmed_by"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "difficulty_prior": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "difficulty_prior"
+            ]
+          },
+          "then": {
+            "required": [
+              "prior_basis",
+              "prior_source"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "clean"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "planted_defect"
+                  ]
+                },
+                {
+                  "required": [
+                    "difficulty_prior"
+                  ]
+                },
+                {
+                  "required": [
+                    "prior_basis"
+                  ]
+                },
+                {
+                  "required": [
+                    "prior_source"
+                  ]
+                },
+                {
+                  "required": [
+                    "reference_oracles"
+                  ]
+                }
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "planted_defect"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "confirmed_by": {
+                "const": "validator"
+              }
+            },
+            "required": [
+              "confirmed_by"
+            ]
+          },
+          "then": {
+            "required": [
+              "confirmation"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "confirmation"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

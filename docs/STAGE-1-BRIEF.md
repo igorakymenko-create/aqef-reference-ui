@@ -1,6 +1,6 @@
 # AQEF Reference UI — Stage 1 Brief
 
-**Revision 1.0 · 30 October 2026**
+**Revision 1.1 · owner amendments for UI-2**
 **For:** the implementing agent (Codex) and the project owner.
 **Basis:**
 - AQEF 1.0-CR1: Volume XV (Reference UI), Appendices A–C;
@@ -43,6 +43,7 @@ Stage 1 succeeds when the owner can do the following without touching a terminal
 docker compose up
  ├─ engine     aqef-reference-engine (pinned tag), unchanged, REST API on :8000
  ├─ aster-sim  simulated subject and Judges, engine provider protocol, on :9100
+ ├─ workspace  YAML-only file service, ./workspace mount, loopback :9200
  └─ ui         static web app, served on :3000, calls the engine API
 ```
 
@@ -53,7 +54,12 @@ docker compose up
 - **UI ↔ engine.** All calls go to the engine's REST API, documented in `docs/API.md` and `docs/OPENAPI.json`. Generate a thin typed client from the OpenAPI document. A cross-origin setup or a reverse proxy is the implementer's choice; record the choice in the README.
 - **Workspace on disk.**
   - A Project is a folder of YAML documents (Appendix A) that the user can keep in git.
-  - The UI reads and writes that folder.
+  - Owner amendment A-2: the browser uses one minimal workspace service to list, read and write YAML files only inside the mounted ./workspace folder, bound to loopback.
+  - The service validates YAML syntax only, makes no engine calls, and has no AQEF or Contract logic.
+  - It rejects traversal, absolute paths, and symlinks outside the folder.
+  - It refuses keys password, api_key, token and secret (case-insensitive) and tells the author to use secret_ref.
+  - On first start it seeds an empty folder from examples/aster/.
+  - D-2 remains unchanged: all AQEF operations go from the browser to the engine API.
   - **Apply** sends it to the engine through the API.
   - **Export** writes the engine's current configuration back to YAML.
 - **Validation.**
@@ -62,12 +68,12 @@ docker compose up
   - If no machine-readable schema exists in the AQEF repository at the tag, derive one from Appendix B and keep it in the UI repository with a note of its source.
 - **Stack.**
   - TypeScript and a mainstream component framework, chosen and recorded by the implementer.
-  - No server component of its own beyond static hosting.
+  - No server component beyond static hosting and the YAML-only workspace service authorized by amendment A-2.
   - Volume XIV expects the UI to sit on a TypeScript SDK. The generated client is the seed of one, but Stage 1 does **not** claim `sdk:typescript`.
 
 ## 4. `aster-sim`: the simulated subject and Judges
 
-A small service that speaks the engine's provider protocol (`docs/PROVIDERS.md`), modelled on the scripted providers in `aqef-cts-harness`. It answers by Scenario, with fixed behaviour, so every run is reproducible.
+A small service derived only from the engine's documented provider protocol (`docs/PROVIDERS.md`), as confirmed by owner amendment A-1. It answers by Scenario, with fixed behaviour, so every run is reproducible. No external harness or specification test material is used.
 
 **Subject `aster-sim-subject@1`.** Aster Support AI is a refund and account support assistant. Behaviours are selected by Scenario or row:
 - a correct, grounded answer;
@@ -137,7 +143,7 @@ Each slice ends with the following, as with the engine:
 | Slice | Content | Done when |
 |---|---|---|
 | **UI-1** | Repository, compose file, `aster-sim`, S-1, S-4, the sample workspace loads | `docker compose up` gives a working Test Explorer over the sample workspace |
-| **UI-2** | S-2 and S-3: YAML workspace, schema checks, Apply with diff, Export, Visual Test Designer | CT-RUI-001 passes as an automated test; Export then Apply round-trips with no difference |
+| **UI-2** | S-2 and S-3: YAML workspace, schema checks, Apply with diff, Export, Visual Test Designer | Independent Volume XV visual/YAML equivalence check passes (owner C-3; no CTS claim); Export then Apply round-trips with no difference |
 | **UI-3** | S-5, S-6 | CT-RUI-002 and CT-RUI-003 pass on inspection |
 | **UI-4** | S-8: runs, Results, Evidence, Human Review, re-assessment | A run of the sample Suite shows every disposition `aster-sim` can produce, each opening to its Evidence |
 | **UI-5** | S-7, S-9: Admission and Seeded Controls | The blind Judge is caught by a defect control; the overcalling Judge by a clean control; the arithmetic shown matches a hand calculation |

@@ -27,6 +27,10 @@ export default defineConfig(({ command }) => {
       port: 3000,
       strictPort: true,
       proxy: {
+        "/workspace": {
+          target: "http://127.0.0.1:9200",
+          rewrite: (p) => p.replace(/^\/workspace/, ""),
+        },
         "/api": {
           target: "http://127.0.0.1:8000",
           rewrite: (p) => p.replace(/^\/api/, ""),

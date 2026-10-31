@@ -38,6 +38,28 @@ test("nginx routes health checks to all five simulated providers", async ({
   });
 });
 
+test("workspace service is seeded and corrected sample applies through the shared preview", async ({
+  page,
+}) => {
+  await page.goto("/#workspace");
+  await expect(
+    page.getByRole("button", { name: "project.yaml", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByTestId("yaml-editor")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Review & Apply", exact: true })
+    .click();
+  await expect(
+    page.getByRole("region", { name: "Apply preview" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Confirm Apply", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: /Apply (complete|no changes)/ }),
+  ).toBeVisible();
+});
+
 test("container-to-container subject and Judge calls produce Results and Evidence", async ({
   page,
 }) => {

@@ -14,5 +14,9 @@ server {
         limit_except GET { deny all; }
         proxy_pass http://aster-sim:9100/;
     }
+    location /workspace/ {
+        client_max_body_size 3m;
+        proxy_pass http://workspace:9200/;
+    }
     location / { try_files $uri $uri/ /index.html; }
 }

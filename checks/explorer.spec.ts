@@ -120,4 +120,55 @@ test("real run appears with engine Results and opens frozen Evidence", async ({
   await expect(
     dialog.getByRole("heading", { name: "Results returned by the engine" }),
   ).toBeVisible();
+  const validator = dialog
+    .locator(".result-group")
+    .filter({ has: page.locator("strong", { hasText: "response-is-text" }) });
+  await expect(validator).toContainText("Validator · schema");
+  await expect(validator).toContainText("Confidence: not applicable");
+  const grounding = dialog
+    .locator(".result-group")
+    .filter({ has: page.locator("strong", { hasText: /^grounding$/ }) });
+  await expect(grounding).toContainText("Judge · aster-sim-judge-reliable@1");
+  await expect(grounding).toContainText("Confidence: 0.94");
+  await grounding
+    .getByRole("button", { name: /Evidence for grounding Result/ })
+    .click();
+  await expect(
+    dialog.getByRole("region", { name: "Selected Result Evidence" }),
+  ).toContainText("Your refund is $99.");
+  await expect(
+    dialog.getByRole("region", { name: "Selected Result Evidence" }),
+  ).toContainText("unsupported currency amount");
+});
+
+test("Result renderer groups unnamed clauses and shows recorded resolution links without deriving them", async ({
+  page,
+}) => {
+  await page.route("**/executions/*/results?*", async (route) => {
+    const response = await route.fetch();
+    const records = await response.json();
+    if (!records.length) {
+      await route.fulfill({ response });
+      return;
+    }
+    const first = {
+      ...records[0],
+      clause: "sha256:renderer-fixture/constraints/0",
+    };
+    const resolution = {
+      ...first,
+      id: "recorded-resolution-fixture",
+      resolves: first.id,
+    };
+    await route.fulfill({ response, json: [first, resolution] });
+  });
+  await page.goto("/");
+  await expect(
+    page
+      .getByText("unnamed clause · constraints position 1", { exact: true })
+      .first(),
+  ).toBeVisible();
+  const resolution = page.locator(".resolution").first();
+  await expect(resolution).toContainText("Resolves Result");
+  await expect(resolution).toContainText("(engine record)");
 });
