@@ -1,0 +1,15 @@
+# Human-authored labels for simulated cases. Not an Admission record or AQEF schema.
+# No Admission is pre-granted. Later slices will record measurements through the API.
+name: aster-human-labelled
+version: '1'
+labelled_by: project-author
+provenance: Manually authored simulation fixtures for this UI; no CTS material used.
+items:
+  - {id: grounded, label: pass}
+  - {id: unsupported-claim, label: fail}
+  - {id: retrieval-miss, label: fail}
+  - {id: claimed-completion, label: fail}
+  - {id: wrong-tool-argument, label: fail}
+  - {id: correct-refusal, label: pass}
+  - {id: over-refusal, label: fail}
+  - {id: slow, label: pass}

@@ -1,0 +1,4 @@
+* text=auto eol=lf
+vendor/** -text
+docs/engine-openapi.json -text
+LICENSE -text

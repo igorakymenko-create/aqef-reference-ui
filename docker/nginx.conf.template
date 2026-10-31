@@ -1,0 +1,18 @@
+server {
+    listen 80;
+    server_name localhost;
+    root /usr/share/nginx/html;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    location /api/ {
+        proxy_pass http://engine:8000/;
+        proxy_set_header Authorization "Bearer ${AQEF_ADMIN_TOKEN}";
+        proxy_read_timeout 180s;
+        proxy_hide_header Authorization;
+    }
+    location /sim/ {
+        limit_except GET { deny all; }
+        proxy_pass http://aster-sim:9100/;
+    }
+    location / { try_files $uri $uri/ /index.html; }
+}
