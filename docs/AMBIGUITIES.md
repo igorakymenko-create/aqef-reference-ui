@@ -1,4 +1,14 @@
-# Ambiguities and engine gaps — UI-1 / UI-2 / UI-3 / UI-4 / UI-5
+# Ambiguities and engine gaps — UI-1 through UI-6
+
+## UI-A26 — An invalid control outcome has no recorded diagnosis at this pin
+
+Owner UI-6 A-2 requires the actual reason and prohibits labelling a confirmed control
+unconfirmed. The pin's per-Oracle objects contain oracle, outcome and result_ids but
+no reason. A null verdict can yield invalid even when confirmed is true. The outer
+control's reason describes full-run invalidation, a different event. The UI therefore
+shows `invalid — no reason recorded by the engine` when the outcome has no reason,
+and preserves confirmation and full records separately. It does not infer a cause
+from dispositions, provider responses, or confirmation flags.
 
 ## UI-A21 — Fixed Evidence for Reference Set scoring
 

@@ -1,5 +1,13 @@
 # Aster simulator — content rules and UI-5 controls
 
+UI-6 Reference Set version 3 adds two rule disagreements without changing the Judge:
+the grounding rule checks amounts, durations and explicitly shaped eligibility clauses,
+so it misses an unsupported loyalty-bonus statement; it also compares currency strings
+literally, rejecting faithful `$49.00` where the source spells `$49`. The reliable
+Judge scores 23/25 agreement after its one exposed item is excluded (κ≈0.840); the
+amount-blind Judge scores 13/26 (κ=0.000). Each disagreement is explained in the item
+labelling_note, which is never sent to the Judge. See the README's two 2×2 tables.
+
 ## UI-5 Reference Set and control examples
 
 reference-set.yaml version 2 supplies 20 fixed grounding Conversations, retrieved

@@ -177,7 +177,7 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
       .fill(oracle);
     await page
       .getByLabel("Reference Set version", { exact: true })
-      .selectOption({ label: "aster-grounding@2" });
+      .selectOption({ label: "aster-grounding@3" });
     await expect(
       page.getByText("1 exposed items excluded for this configuration.", {
         exact: true,
@@ -187,7 +187,7 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
     await page
       .getByLabel("Chance-corrected measure", { exact: true })
       .selectOption("cohen_kappa");
-    await page.getByLabel("Declared threshold", { exact: true }).fill("0.7");
+    await page.getByLabel("Declared threshold", { exact: true }).fill("0.8");
     await page
       .getByRole("button", { name: "Record declaration", exact: true })
       .click();
@@ -197,7 +197,7 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
     plan = await sourcePlan(page);
     expect(plan.declared_by).toBe("aster-local-person");
     expect(plan.results_seen).toBe(false);
-    expect(plan.items).toHaveLength(19);
+    expect(plan.items).toHaveLength(25);
     await page
       .getByLabel("Diagnostic Environment", { exact: true })
       .selectOption("local-simulation");
@@ -244,7 +244,7 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
     await page
       .getByRole("button", { name: "Compute and show agreement", exact: true })
       .click();
-    await expect(page.getByTestId("kappa")).toHaveText("1");
+    await expect(page.getByTestId("kappa")).toHaveText("0.840");
     plan = await sourcePlan(page);
     const included = reference.items.filter((i: any) => !i.exposed),
       scores = plan.scores;
@@ -264,10 +264,9 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
       po = (a + d) / n,
       pe = ((a + b) * (a + c) + (c + d) * (b + d)) / (n * n),
       k = (po - pe) / (1 - pe);
-    expect(Number(await page.getByTestId("kappa").textContent())).toBeCloseTo(
-      k,
-      12,
-    );
+    expect(await page.getByTestId("kappa").textContent()).toBe(k.toFixed(3));
+    expect(k).toBeGreaterThan(0.8);
+    expect(k).toBeLessThan(1);
     await expect(
       page.getByRole("region", { name: "Agreement arithmetic" }),
     ).toContainText(`(${a} + ${d}) / ${n}`);
@@ -278,6 +277,8 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
       .getByRole("button", { name: "Record Admission", exact: true })
       .click();
     const payload = (await sent).postDataJSON();
+    expect(payload.chance_corrected_agreement).toBeCloseTo(k, 12);
+    expect(payload.raw_agreement).toBe(po);
     expect(Object.keys(payload).sort()).toEqual(
       [
         "oracle",
@@ -343,6 +344,96 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
     await expect(
       page.getByText(/New Judge configuration:/).first(),
     ).toBeVisible();
+  });
+  test("the blind Judge disagrees on the same Reference Set and records admitted false", async ({
+    page,
+  }) => {
+    await page.goto("/#admission");
+    await page
+      .getByLabel("Admission Project", { exact: true })
+      .selectOption(projectName);
+    const blind = JSON.stringify({
+      ...JSON.parse(oracle),
+      model: "aster-sim-judge-blind@1",
+    });
+    await page
+      .getByLabel("Exact Oracle string (including historical configuration)", {
+        exact: true,
+      })
+      .fill(blind);
+    await page
+      .getByLabel("Reference Set version", { exact: true })
+      .selectOption({ label: "aster-grounding@3" });
+    await page
+      .getByLabel("Chance-corrected measure", { exact: true })
+      .selectOption("cohen_kappa");
+    await page.getByLabel("Declared threshold", { exact: true }).fill("0.8");
+    await page
+      .getByRole("button", { name: "Record declaration", exact: true })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: /Declared workflow/ }),
+    ).toBeVisible();
+    plan = await sourcePlan(page);
+    await page
+      .getByLabel("Diagnostic Environment", { exact: true })
+      .selectOption("local-simulation");
+    await page
+      .getByRole("button", {
+        name: "Generate Suite → Review & Apply",
+        exact: true,
+      })
+      .click();
+    await expect(page.getByLabel("YAML diff", { exact: true })).toContainText(
+      "reference-grounding",
+    );
+    await page
+      .getByRole("button", { name: "Review & Apply", exact: true })
+      .click();
+    await expect(
+      page.getByRole("region", { name: "Apply preview" }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Confirm Apply", exact: true })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "Apply complete", exact: true }),
+    ).toBeVisible();
+    await resume(page);
+    await page
+      .getByRole("button", { name: "Run declared Reference Set", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", {
+        name: "Compute and show agreement",
+        exact: true,
+      }),
+    ).toBeEnabled({ timeout: 45000 });
+    await page
+      .getByRole("button", { name: "Compute and show agreement", exact: true })
+      .click();
+    await expect(page.getByTestId("kappa")).toHaveText("0.000");
+    const table = page
+      .getByRole("region", { name: "Agreement arithmetic" })
+      .locator("tbody tr");
+    await expect(table.nth(0)).toContainText("13");
+    await expect(table.nth(1)).toContainText("13");
+    const sent = page.waitForRequest(
+      (r) => r.url().endsWith("/admissions") && r.method() === "POST",
+    );
+    await page
+      .getByRole("button", { name: "Record Admission", exact: true })
+      .click();
+    expect((await sent).postDataJSON()).toMatchObject({
+      oracle: blind,
+      threshold: 0.8,
+      admitted: false,
+      chance_corrected_agreement: 0,
+      raw_agreement: 0.5,
+    });
+    await expect(page.locator(".admission-record").last()).toContainText(
+      "admitted: false",
+    );
   });
   test("single-class labels are not_computed, missing verdicts never get fabricated agreement", () => {
     const labels = Array.from({ length: 20 }, (_, i) => ({
@@ -474,11 +565,24 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
     await controlsReady(page);
     await expect(
       page
-        .getByText("Evidence not confirmed — no verdict about the Oracle", {
+        .getByText("invalid — no reason recorded by the engine", {
           exact: true,
         })
         .first(),
     ).toBeVisible();
+    const confirmedClean = page.getByRole("region", {
+      name: "Control faithful-clean",
+      exact: true,
+    });
+    await expect(confirmedClean).toContainText("confirmed: true");
+    await expect(confirmedClean).not.toContainText("Evidence not confirmed");
+    await expect(confirmedClean).toContainText(
+      "invalid — no reason recorded by the engine",
+    );
+    const invalidation = confirmedClean.locator("details").filter({
+      has: page.locator("summary", { hasText: "Full-run invalidation" }),
+    });
+    await expect(invalidation).not.toHaveAttribute("open", "");
     const pending = page.getByRole("region", {
       name: "Control awaiting-confirmation",
       exact: true,
@@ -635,6 +739,10 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
       exact: true,
     });
     await section
+      .locator("summary")
+      .filter({ hasText: "Full-run invalidation" })
+      .click();
+    await section
       .getByLabel("Full-run invalidation reason", { exact: true })
       .fill("The instrument failure compromises this whole demonstration run.");
     await section
@@ -688,7 +796,7 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
     await page
       .getByLabel("Chance-corrected measure", { exact: true })
       .selectOption("cohen_kappa");
-    await page.getByLabel("Declared threshold", { exact: true }).fill("0.7");
+    await page.getByLabel("Declared threshold", { exact: true }).fill("0.8");
     await page
       .getByRole("button", { name: "Record declaration", exact: true })
       .click();

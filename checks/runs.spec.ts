@@ -3,13 +3,15 @@ import type { Batch } from "../src/runs/api";
 let infrastructure: Batch, first: Batch, second: Batch;
 let originalResults: Record<string, unknown> = {};
 const base = "/api/projects/aster-support";
-async function resultRows(page: Page, id: string) {
+async function resultRows(page: Page, id: string, project = "aster-support") {
   return (
-    await page.request.get(`${base}/executions/${id}/results?limit=1000`)
+    await page.request.get(
+      `/api/projects/${project}/executions/${id}/results?limit=1000`,
+    )
   ).json();
 }
-async function show(page: Page, id: string) {
-  await page.goto(`/#runs/aster-support/${id}`);
+async function show(page: Page, id: string, project = "aster-support") {
+  await page.goto(`/#runs/${project}/${id}`);
   await expect(
     page.getByRole("heading", { name: `Execution ${id}`, exact: true }),
   ).toBeVisible();
@@ -226,70 +228,149 @@ test.describe.serial("UI-4 independent Runs and Evidence checks", () => {
   test("flaky outage re-checks form a three-link chain with unchanged Oracle and no subject calls", async ({
     page,
   }) => {
-    const execution = scenario(second, "recoverable-outage");
-    await show(page, execution.id);
-    const original = (await resultRows(page, execution.id)).find(
-      (r: any) => r.oracle_type === "judge",
-    );
-    expect(original.disposition).toBe("oracle_unavailable");
-    const count = (await (await page.request.get("/sim-control/flaky")).json())
-      .subject_calls;
-    const request = page.waitForRequest((r) => r.url().endsWith("/reassess"));
-    await page
-      .getByRole("button", {
-        name: "Re-check with the same Oracle",
-        exact: true,
-      })
-      .click();
-    expect((await request).postDataJSON()).toEqual({ oracle: original.oracle });
-    await expect(page.getByRole("status")).toContainText(
-      "Re-check recorded oracle_unavailable",
-    );
-    let rows = await resultRows(page, execution.id);
-    const unavailable = rows.find((r: any) => r.resolves === original.id);
-    expect(unavailable.disposition).toBe("oracle_unavailable");
-    await page.goto("/#connections");
-    await page
-      .getByRole("button", { name: "Turn flaky outage off", exact: true })
-      .click();
-    await expect(
-      page.getByRole("region", { name: "Simulator control" }),
-    ).toContainText("Flaky outage: off");
-    await show(page, execution.id);
-    await page
-      .getByRole("button", {
-        name: "Re-check with the same Oracle",
-        exact: true,
-      })
-      .click();
-    await expect(page.getByRole("status")).toContainText(
-      "Re-check recorded actionable",
-    );
-    rows = await resultRows(page, execution.id);
-    const recovered = rows.find((r: any) => r.resolves === unavailable.id);
-    expect(recovered.disposition).toBe("actionable");
-    expect(rows.find((r: any) => r.id === original.id)).toEqual(original);
-    const chain = page
-      .getByRole("region", { name: /Resolution chain \d+/ })
-      .filter({ has: page.locator(`[data-result-id="${original.id}"]`) });
-    await expect(chain.locator(".chain-link")).toHaveCount(3);
+    // Recovery is not a product latency test. A shared sample batch inherits a
+    // 200ms latency Validator which may short-circuit this Judge under host load.
+    const project = "ui4-recovery-" + crypto.randomUUID();
+    const definition = await (await page.request.get(base)).json();
     expect(
-      (await (await page.request.get("/sim-control/flaky")).json())
-        .subject_calls,
-    ).toBe(count);
-    await expect(
-      page.getByRole("button", {
-        name: "Re-check with the same Oracle",
-        exact: true,
-      }),
-    ).toHaveCount(0);
-    await page.screenshot({
-      path: ".local/ui4-recovery-chain.png",
-      fullPage: true,
-    });
-    await page.request.post("/sim-control/flaky", {
-      data: { unavailable: true },
-    });
+      (
+        await page.request.post("/sim-control/flaky", {
+          data: { unavailable: true },
+        })
+      ).ok(),
+    ).toBe(true);
+    const recoveryProject = {
+      name: project,
+      environments: definition.environments,
+      suites: [
+        {
+          name: "recovery",
+          scenarios: [
+            {
+              name: "recoverable-outage",
+              prompt: { template: "What is my $49 refund?" },
+              variables: { sim_case: "grounded" },
+              contract: {
+                expectations: [
+                  {
+                    id: "grounding",
+                    criteria:
+                      "[grounding] Amounts must be supported by retrieved context.",
+                    confidence_threshold: 0.8,
+                    judge: {
+                      model: "aster-sim-judge-flaky@1",
+                      confidence_source: "self_rating",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const guarded = structuredClone(
+      recoveryProject.suites[0].scenarios[0],
+    ) as any;
+    guarded.name = "guarded-slow-outage";
+    guarded.variables.sim_case = "slow";
+    guarded.contract.constraints = [
+      definition.contracts[0].constraints.find(
+        (c: any) => c.id === "response-latency",
+      ),
+    ];
+    recoveryProject.suites[0].scenarios.push(guarded);
+    expect(
+      (
+        await page.request.post("/api/projects", { data: recoveryProject })
+      ).status(),
+    ).toBe(201);
+    const batch = await (
+      await page.request.post(`/api/projects/${project}/executions`, {
+        data: { suite: "recovery", environment: "local-simulation" },
+      })
+    ).json();
+    const execution = batch.executions.find(
+      (e: any) => e.scenario === "recoverable-outage",
+    );
+    const guardedExecution = batch.executions.find(
+      (e: any) => e.scenario === "guarded-slow-outage",
+    );
+    // Deterministic reproduction of the old fixture's short-circuit path.
+    const guardedResults = await resultRows(page, guardedExecution.id, project);
+    expect(
+      guardedResults.find((r: any) => r.clause === "response-latency").verdict,
+    ).toBe("fail");
+    expect(guardedResults.filter((r: any) => r.oracle_type === "judge")).toHaveLength(0);
+    try {
+      await show(page, execution.id, project);
+      const original = (await resultRows(page, execution.id, project)).find(
+        (r: any) => r.oracle_type === "judge",
+      );
+      expect(original.disposition).toBe("oracle_unavailable");
+      const count = (
+        await (await page.request.get("/sim-control/flaky")).json()
+      ).subject_calls;
+      const request = page.waitForRequest((r) => r.url().endsWith("/reassess"));
+      await page
+        .getByRole("button", {
+          name: "Re-check with the same Oracle",
+          exact: true,
+        })
+        .click();
+      expect((await request).postDataJSON()).toEqual({
+        oracle: original.oracle,
+      });
+      await expect(page.getByRole("status")).toContainText(
+        "Re-check recorded oracle_unavailable",
+      );
+      let rows = await resultRows(page, execution.id, project);
+      const unavailable = rows.find((r: any) => r.resolves === original.id);
+      expect(unavailable.disposition).toBe("oracle_unavailable");
+      await page.goto("/#connections");
+      await page
+        .getByRole("button", { name: "Turn flaky outage off", exact: true })
+        .click();
+      await expect(
+        page.getByRole("region", { name: "Simulator control" }),
+      ).toContainText("Flaky outage: off");
+      await show(page, execution.id, project);
+      await page
+        .getByRole("button", {
+          name: "Re-check with the same Oracle",
+          exact: true,
+        })
+        .click();
+      await expect(page.getByRole("status")).toContainText(
+        "Re-check recorded actionable",
+      );
+      rows = await resultRows(page, execution.id, project);
+      const recovered = rows.find((r: any) => r.resolves === unavailable.id);
+      expect(recovered.disposition).toBe("actionable");
+      expect(rows.find((r: any) => r.id === original.id)).toEqual(original);
+      const chain = page
+        .getByRole("region", { name: /Resolution chain \d+/ })
+        .filter({ has: page.locator(`[data-result-id="${original.id}"]`) });
+      await expect(chain.locator(".chain-link")).toHaveCount(3);
+      expect(
+        (await (await page.request.get("/sim-control/flaky")).json())
+          .subject_calls,
+      ).toBe(count);
+      await expect(
+        page.getByRole("button", {
+          name: "Re-check with the same Oracle",
+          exact: true,
+        }),
+      ).toHaveCount(0);
+      await page.screenshot({
+        path: ".local/ui4-recovery-chain.png",
+        fullPage: true,
+      });
+    } finally {
+      await page.request.post("/sim-control/flaky", {
+        data: { unavailable: true },
+      });
+    }
   });
   test("direct Human review: real missing-Role refusal is verbatim, valid review completes in place", async ({
     page,

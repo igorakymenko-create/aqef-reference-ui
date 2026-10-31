@@ -66,3 +66,38 @@ the engine still checks every permission and Role. Credentials stay server-side.
 An existing Project or workspace file is never silently replaced: add the desired
 Scenario definitions from this sample in Workspace, review the Apply diff, and
 confirm before running the extended Suite. Engine history remains intact.
+# UI-6 Admission walkthrough — Reference Set version 3
+
+The 26-item set is illustrative material for local Person review, not an independent
+Human study. It preserves the original cases and adds faithful paraphrases, unsupported
+amounts, an unsupported loyalty bonus, and equivalent monetary formatting. The last
+two produce real disagreements with the narrow reliable content rules; no Judge reads
+a label, item id or case name. One item remains exposed to the reliable configuration.
+
+In Admission, choose the exact instrument grounding configuration with criteria
+`[grounding] Every amount and duration must be supported by retrieved policy.` and
+Reference Set `aster-grounding@3`. Declare Cohen's κ and threshold **0.800** before
+running. Generate the diagnostic Suite, Review & Apply, return/resume, run and inspect
+all arithmetic, then record. Repeat with the blind configuration and the same version
+and threshold. No subject is called by either diagnostic run.
+
+| Human / reliable Judge | pass | fail |
+|---|---:|---:|
+| pass | 11 | 1 |
+| fail | 1 | 12 |
+
+One exposed item is excluded: N=25, Pₒ=23/25=0.920,
+Pₑ=(12×12+13×13)/25²=0.5008, κ=(0.92−0.5008)/(1−0.5008)=0.8397435897435898.
+The submitted evidence records **admitted: true** at threshold 0.800.
+
+| Human / blind Judge | pass | fail |
+|---|---:|---:|
+| pass | 13 | 0 |
+| fail | 13 | 0 |
+
+No item is marked exposed to this configuration: N=26, Pₒ=13/26=0.500,
+Pₑ=(13×26+13×0)/26²=0.500, κ=0.000.
+The submitted evidence records **admitted: false**. These are different exact Oracles;
+the reliable Judge's Admission never applies to the blind one. The UI shows three
+decimals while the engine record preserves the exact supplied numbers.
+

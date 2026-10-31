@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Execution, Result } from "../api";
 import { EngineError } from "../api";
+import { figure } from "../format";
 import { ResultEntries, clauseLabel } from "../ResultEntries";
 import {
   chains,
@@ -28,7 +29,7 @@ const confidence = (value: unknown) =>
     ? "not applicable"
     : value === undefined
       ? "not recorded"
-      : String(value);
+      : figure(value);
 
 function Artifacts({ items }: { items: RecordData[] }) {
   return (

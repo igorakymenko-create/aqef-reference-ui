@@ -19,6 +19,7 @@ import {
 import { SelectField, InputField } from "../workspace/OracleFields";
 import { agreement, excluded, propose } from "./model";
 import { canonical } from "../workspace/model";
+import { figure } from "../format";
 
 export function AdmissionScreen() {
   const [projects, setProjects] = useState<RecordData[]>([]),
@@ -649,18 +650,18 @@ export function AdmissionScreen() {
               <p>
                 Raw agreement Pₒ = (pass/pass + fail/fail) / N = (
                 {figures.table[0][0]} + {figures.table[1][1]}) / {figures.n} ={" "}
-                {String(figures.raw ?? "not_computed")}.
+                {figure(figures.raw ?? "not_computed")}.
               </p>
               <p>
                 Expected chance Pₑ = (human pass × Judge pass + human fail ×
                 Judge fail) / N² = ({figures.hp} × {figures.jp} + {figures.hf} ×{" "}
                 {figures.jf}) / {figures.n}² ={" "}
-                {String(figures.expected ?? "not_computed")}.
+                {figure(figures.expected ?? "not_computed")}.
               </p>
               <p>
-                Cohen’s κ = (Pₒ − Pₑ) / (1 − Pₑ) = ({String(figures.raw)} −{" "}
-                {String(figures.expected)}) / (1 − {String(figures.expected)}) ={" "}
-                <strong data-testid="kappa">{figures.kappa}</strong>.
+                Cohen’s κ = (Pₒ − Pₑ) / (1 − Pₑ) = ({figure(figures.raw)} −{" "}
+                {figure(figures.expected)}) / (1 − {figure(figures.expected)}) ={" "}
+                <strong data-testid="kappa">{figure(figures.kappa)}</strong>.
               </p>
               {figures.kappa === "not_computed" && (
                 <p>
@@ -672,7 +673,7 @@ export function AdmissionScreen() {
                 Proposed admitted = value ≥ declared threshold ={" "}
                 {figures.kappa === "not_computed"
                   ? "not_computed"
-                  : figures.kappa}{" "}
+                  : figure(figures.kappa)}{" "}
                 ≥ {threshold}:{" "}
                 {String(
                   figures.kappa !== "not_computed" &&
@@ -680,6 +681,10 @@ export function AdmissionScreen() {
                 )}
                 . The engine accepts or refuses the record.
               </p>
+              <details>
+                <summary>Exact agreement arithmetic (unrounded)</summary>
+                <Raw value={figures} />
+              </details>
               <details>
                 <summary>Every scored item and Result id</summary>
                 <Raw value={plan.scores} />

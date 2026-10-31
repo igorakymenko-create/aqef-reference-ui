@@ -1,5 +1,37 @@
 # Implementation notes
 
+## UI-6 — UI-5 corrections
+
+The UI-4 outage check borrowed the second shared product batch. That Project's
+200ms latency Validator ran before the flaky Judge; host scheduling could fail the
+Validator and short-circuit assessment, leaving no Judge Result for the test to
+re-check. The check now owns a fresh recovery Project with no inherited latency
+guard on its recovery Scenario, explicitly sets the simulator outage before running,
+and restores it in finally. A second, deliberately slow Scenario reproduces the old
+path: the original 200ms Validator fails and the engine returns no Judge Result.
+The recovery Scenario still proves exactly three engine links with one unchanged
+Oracle and no further subject calls. No retry or timeout increase is used for this fix.
+
+Invalid control labels now use an outcome's recorded reason if supplied, otherwise
+`invalid — no reason recorded by the engine`. The pin does not include a reason in
+its per-Oracle outcome records; its control-level reason is specifically for full-run
+invalidation and is not repurposed as an invalid-outcome diagnosis. Confirmed controls
+are never described as unconfirmed by inference. Full-run invalidation forms are
+collapsed until explicitly expanded.
+
+Reference Set version 3 has 26 illustrative labelled items. Two additions deliberately
+expose content-rule limits: an unsupported loyalty bonus that the amount/duration
+grammar misses, and the faithful `$49.00` versus `$49` formatting it overcalls. For
+the reliable configuration one exposed item is excluded: the 25-item table is
+[[11,1],[1,12]], raw agreement 0.92, chance agreement 0.5008 and κ about 0.840.
+The blind configuration includes all 26 items: [[13,0],[13,0]], κ 0.000. At a
+predeclared 0.800 threshold the workflow records admitted true and false respectively.
+Labels and case names never enter Judge Evidence. Displayed agreement and Confidence
+use three decimals; exact arithmetic and engine request/response values are retained.
+Before implementing the reporting slice, all 37 UI-1–UI-5 checks passed three complete
+sequential runs on fresh disposable services (2.8m, 2.7m, 2.7m). The recovery check's
+guarded short-circuit reproduction and three-link recovery both passed in every run.
+
 ## UI-5 — Admission, Seeded Controls and readable Evidence
 
 Completed the UI-4 presentation corrections first: Conversation/Artifacts/Results
