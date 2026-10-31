@@ -3,6 +3,7 @@ dist
 .git
 .env
 .local
+/workspace/
 test-results
 playwright-report
 **/__pycache__

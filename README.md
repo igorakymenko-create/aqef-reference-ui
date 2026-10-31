@@ -1,8 +1,9 @@
 # AQEF Reference UI
 
-Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-1**
-implements Connections (S-1), Test Explorer (S-4), and the Aster simulated workspace.
-This slice does not claim `reference_ui` conformance. UI-2 through UI-6 remain to be built.
+Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-2** adds
+Workspace (S-2), a YAML editor and Visual Test Designer (S-3), with the owner's UI-1
+simulator and Result-labelling corrections. Connections (S-1) and Test Explorer (S-4)
+remain available. No `reference_ui` or CTS conformance is claimed; UI-3 through UI-6 remain.
 
 ## Start locally
 
@@ -16,10 +17,11 @@ docker compose up --build
 
 Open **http://localhost:3000**. Subsequent starts use `docker compose up`.
 The first build needs network access for container images and pinned dependencies.
-All published ports bind only to loopback. There are three long-running services:
+All published ports bind only to loopback. There are four long-running services:
 
 * `engine`: unchanged reference engine, port 8000, persistent SQLite volume;
 * `aster-sim`: scripted subject and Judges, internal port 9100;
+* `workspace`: YAML-only file service, port 9200, host-mounted `./workspace`;
 * `ui`: static React/TypeScript application in nginx, port 3000.
 
 Startup waits for the simulator, then loads `examples/aster/project.yaml` through
@@ -28,6 +30,12 @@ governed Contract definition. If the Project already exists, startup preserves i
 including changes and history. It never silently overwrites the running Project.
 An import rejection fails startup and prints the engine's error body.
 
+The workspace service separately seeds an empty `./workspace` from `examples/aster/`.
+Existing files are never overwritten by seeding. If you already ran UI-1, open
+Workspace and use **Review & Apply**, inspect the corrected sample diff, then
+**Confirm Apply** to load the six property-specific Judge criteria. Existing engine
+history remains immutable. See [workspace protocol and Apply behaviour](docs/WORKSPACE.md).
+
 `docker compose down` stops the services and retains the database. Changing the
 bootstrap token does not rotate an existing Principal's stored credential: retain
 the token used for that database. Do not remove the volume unless you intend to
@@ -35,10 +43,20 @@ discard all local history.
 
 ## What to inspect
 
+* **Workspace**: browse the file tree, edit highlighted YAML with authoring-schema
+  feedback, review created/changed/unchanged resources and diffs, confirm Apply,
+  inspect every engine call outcome, or Export the engine's current configuration.
+  Partial and failed Apply states retain the verbatim engine error. Export → Apply
+  produces no changes. Names in `secret_ref` are plain names, never secret values.
+* **Visual Test Designer**: choose a Project document and Suite, author a Scenario's
+  Prompt, Variables/Dataset binding and Constraint/Single Judge clauses. All author
+  fields start empty. Every change shows its YAML diff and uses the exact same
+  Review & Apply path as the editor; the engine computes the effective Contract.
 * **Test Explorer**: browse Project and Suite definitions, filter eight Scenarios,
   inspect their Contracts, Dataset binding, recorded Baselines, latest Execution,
-  its engine Results and frozen Evidence. There is no edit or execution control in
-  this slice. An empty history reads **Not run**, never pass.
+  its engine Results and frozen Evidence. Entries are grouped by clause and show
+  Oracle kind/identifier, disposition, verdict, Confidence/not applicable, recorded
+  resolution references and individual Evidence links. Explorer stays read-only.
 * **Connections**: inspect the exact startup provider mapping and each simulated
   provider's health. The `down` Judge intentionally shows **unavailable**. Provider
   availability is independent from a quality verdict.
@@ -73,7 +91,9 @@ proof of current validity; see [recorded gaps](docs/AMBIGUITIES.md).
   `config/providers.json` supplies both the engine mapping and Connections (G-1).
   Its URLs contain no credentials. No AQEF configuration contains provider URLs.
 * No custom UI application server. nginx serves static assets and proxies requests.
-  Python launch scripts supervise the unchanged engine and seed via its API.
+  Python launch scripts supervise the unchanged engine and seed via its API. The
+  only additional application service is the owner's explicitly authorized YAML-only
+  workspace service; it has no engine calls or AQEF logic.
 
 ## Development and verification
 
@@ -97,10 +117,14 @@ npm run test:e2e
 ```
 
 Playwright starts a disposable real pinned engine, simulator and Vite reverse proxy
-on loopback (ports 8000, 9100, 9191, 3000). Its credential is generated in memory;
+on loopback (ports 8000, 9100, 9200, 9191, 3000). Its credential is generated in memory;
 its temporary database is separate from the user's database. Tests cover browsing,
 search, unavailable providers, verbatim engine errors, narrow layouts, and a real
-run with Evidence. These are independently authored checks, **not CTS tests**.
+run with Evidence. UI-2 checks also prove visual/YAML authorship equivalence using
+all API fields and engine-frozen effective Contracts, Export → Apply round-trip,
+real partial failure, dependency ordering and secret guards. These are independently
+authored checks, **not CTS tests**. Stop the user Compose deployment before the
+development checks because they use the same ports; its database volume is retained.
 
 To check a running Docker Compose deployment instead of starting development
 servers:
@@ -109,7 +133,7 @@ servers:
 npm run test:e2e -- --config playwright.docker.config.ts
 ```
 
-These three checks browse the built static UI through nginx, check provider health
+These four checks browse the built static UI through nginx, check provider health
 and authentication, and run the sample Suite through the real containerized engine.
 The run intentionally remains in the local database as eight Executions with Results
 and Evidence; the sample Gate fails because the simulator includes known defects.
@@ -126,7 +150,6 @@ See [implementation and verification](docs/IMPLEMENTATION_NOTES.md),
 
 ## Next slices
 
-UI-2: YAML workspace, schema checks, Apply diff, Export, Visual Test Designer.
 UI-3: Validator Designer and Judge Configuration. UI-4: runs and Evidence workflows.
 UI-5: Admission and Seeded Controls. UI-6: Gates, frozen Reports and live Dashboard.
 An external reviewer for final inspection remains to be named by the owner; that

@@ -1,6 +1,9 @@
-# UI-1 ambiguities and engine gaps
+# Ambiguities and engine gaps — UI-1 / UI-2
 
-## UI-A01 — Stage brief references forbidden external test material
+UI-2 entries below record owner amendments and implementation choices; no engine
+behaviour or historical records are changed.
+
+## UI-A01 — RESOLVED by owner amendment A-1: forbidden external test material
 
 **Source:** Stage 1 brief §4: “modelled on the scripted providers in `aqef-cts-harness`”;
 §9 refers to external CT-RUI inspection. Project instruction: “Never access ... any
@@ -14,6 +17,8 @@ specification requirements.
 specification test material was fetched or inspected. The simulator follows only
 the pinned engine's documented wire protocol. Own checks make no CTS claim. Final
 external inspection is the owner's separate process.
+
+**Resolution:** the owner removed the harness as a simulator source in UI-2 amendment A-1. The simulator is derived only from the pinned provider protocol.
 
 ## UI-A02 / G-5 — Current Baseline validity has no read-only status endpoint
 
@@ -79,3 +84,76 @@ setup of `.env`, then support a single Compose command for startup.
 **Choice:** `.env.example` contains an explicitly replaceable example. Compose refuses
 an absent token; no credential is baked into assets. One-time setup is documented,
 after which `docker compose up` starts all three services and loads a missing sample.
+
+## UI-A07 — RESOLVED by owner A-2: on-disk workspace needs a service
+
+**Source:** original brief §3: "No server component ... beyond static hosting" and
+"The UI reads and writes that folder." Static hosting cannot provide unrestricted
+folder writes. The owner explicitly added the YAML-only workspace service in A-2.
+
+**Choice:** one file service over ./workspace, with syntax/secret-key/path checks,
+no AQEF logic and no engine calls. It conservatively rejects all symlinks. The amended
+brief and docs/WORKSPACE.md record its exact protocol and first-start seeding.
+
+## UI-A08 / G-6 — Per-resource Apply while every intermediate Project must be valid
+
+**Source:** owner C-1: "per-resource calls in dependency order"; the pinned API exposes
+Project replacement, but no Suite PUT. Whole-Project B.3 validation applies to each
+configuration write. Updating a Contract and its consuming definitions separately can
+make an intermediate graph invalid even when the final document is valid.
+
+**Readings:** emulate missing methods or silently reorder until acceptance; or use
+existing Project POST/PUT for its inline graph and explicit registry calls for external
+resources. **Choice:** the second. The preview inventories each inline resource and
+names the atomic Project call that covers it. Standalone Datasets and reusable
+Contracts have separate calls in dependency order. A needed new Project namespace is
+explicitly shown as a skeleton call, never hidden. All failures are reported; no rule
+is weakened, no bulk endpoint or engine change is introduced.
+
+## UI-A09 — Preview freshness and partial Apply are not a transaction
+
+**Source:** owner C-1 requires diffs and every call outcome, including partial failure.
+The engine offers neither a bulk transaction nor a conditional-write revision token.
+
+**Choice:** compare source etags and the engine read set again before saving/calling;
+refuse stale previews. Write the reviewed YAML, then issue the shown engine calls.
+Keep the source if the engine rejects it; skip dependent calls for that Project and
+show partial/failed plus verbatim responses. A race after the read-set check cannot
+be eliminated without an engine API change. No claim of cross-resource atomicity or
+implicit rollback is made. File writes themselves are optimistic and atomic per file.
+
+## UI-A10 — Export, split files and authoring-schema scope
+
+**Source:** Appendix A calls file splitting implementation-defined; B.1 lists schema
+types beyond configuration authoring; owner C-1 asks for checks derived from A/B.
+
+**Choice:** document project/owner/resource wrappers in WORKSPACE.md. Reject conflicting
+contributions; identical definitions are allowed. Auxiliary labelled Reference Sets
+are not treated as Project config. Export rewrites current definitions and registry
+resources, updating existing scoped documents. Since the file service deliberately
+has no delete endpoint, an obsolete scoped document is reported for owner removal,
+never silently ignored. The committed schema is explicitly an authoring subset of
+A.1-A.10/B.2 with the pinned engine's Static Dataset scope, not a complete B.1 runtime
+schema or a conformance claim. Cross-resource B.3 acceptance belongs to the engine.
+
+## UI-A11 / G-7 — Comparing effective Contracts without a read-only endpoint
+
+**Source:** owner C-3 asks to compare the effective Contract through the engine; the
+pinned API exposes the resolved Contract in frozen Execution configuration.
+
+**Choice:** the independent browser check retrieves both Scenario definitions and
+runs their Suite, then compares the engine-returned configuration.contract values.
+The UI never computes a composed/effective Contract for this check. This also
+exercises the two saved definitions; the check makes no CTS claim.
+
+## UI-A12 — Owner correction B-1 removes the simulator answer key
+
+**Source:** owner B-1: "Judges must judge content, not read the answer."
+
+**Choice:** subject Evidence contains only retrieved context, passive tool calls and
+normal engine/provider metadata. A leading visible criteria tag selects one content
+property rule. Reliable, blind and overcall variants inspect Conversation and content
+Artifacts, never fixture names or verdict labels. Blind skips only grounding amounts;
+overcall's one false-alarm rule rejects any stated currency amount. Rules and their
+limited deterministic grammar are documented in SIMULATOR.md. Historical engine
+Evidence remains immutable, including records made before this correction.

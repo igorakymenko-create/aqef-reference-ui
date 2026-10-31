@@ -15,6 +15,10 @@ export type Execution = {
 };
 export type Result = {
   id: string;
+  clause: string;
+  oracle_type: string;
+  oracle: string;
+  resolves?: string;
   recorded_at: string;
   disposition: string;
   verdict: string | null;

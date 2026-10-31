@@ -9,7 +9,14 @@ const env = {
 };
 export default defineConfig({
   testDir: "./checks",
-  testMatch: "explorer.spec.ts",
+  projects: [
+    { name: "ui-1", testMatch: "explorer.spec.ts" },
+    {
+      name: "ui-2",
+      testMatch: ["workspace.spec.ts", "schema.spec.ts"],
+      dependencies: ["ui-1"],
+    },
+  ],
   workers: 1,
   fullyParallel: false,
   use: {

@@ -1,4 +1,16 @@
 services:
+  workspace:
+    build:
+      context: .
+      dockerfile: docker/workspace.Dockerfile
+    volumes:
+      - ./workspace:/workspace
+    ports: ["127.0.0.1:9200:9200"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9200/healthz', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
   engine:
     build:
       context: .
@@ -35,6 +47,8 @@ services:
       AQEF_ADMIN_TOKEN: ${AQEF_ADMIN_TOKEN:?Set the local engine token}
     depends_on:
       engine:
+        condition: service_healthy
+      workspace:
         condition: service_healthy
     ports: ["127.0.0.1:3000:80"]
 volumes:

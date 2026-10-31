@@ -22,6 +22,7 @@ with tempfile.TemporaryDirectory(prefix='aqef-ui-e2e-') as directory:
     env['AQEF_PROVIDER_URLS'] = json.dumps({k: v.replace('aster-sim', '127.0.0.1', 1) for k, v in providers.items()})
     try:
         processes.append(subprocess.Popen([sys.executable, '-m', 'sim.server'], cwd=ROOT, env=env))
+        processes.append(subprocess.Popen([sys.executable, '-m', 'workspace_service.server', '--root', str(Path(directory)/'workspace')], cwd=ROOT, env=env))
         processes.append(subprocess.Popen([sys.executable, '-m', 'uvicorn', 'engine.main:app', '--host', '127.0.0.1', '--port', '8000'], cwd=ROOT, env=env))
         for _ in range(100):
             if any(p.poll() is not None for p in processes): raise RuntimeError('Local check dependency exited')
@@ -29,6 +30,7 @@ with tempfile.TemporaryDirectory(prefix='aqef-ui-e2e-') as directory:
                 request = urllib.request.Request('http://127.0.0.1:8000/healthz', headers={'Authorization': 'Bearer ' + env['AQEF_ADMIN_TOKEN']})
                 urllib.request.urlopen(request, timeout=1).close()
                 urllib.request.urlopen('http://127.0.0.1:9100/healthz', timeout=1).close()
+                urllib.request.urlopen('http://127.0.0.1:9200/healthz', timeout=1).close()
                 break
             except urllib.error.URLError: time.sleep(.2)
         else: raise RuntimeError('Local check dependencies did not become ready')

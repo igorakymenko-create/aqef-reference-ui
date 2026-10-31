@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import * as api from "./api";
+import { ResultEntries, ResultEvidence } from "./ResultEntries";
+import { WorkspaceScreen } from "./workspace/WorkspaceScreen";
 import "./style.css";
 
 function Badge({
@@ -125,6 +127,7 @@ function Connections() {
 
 type Selected = { suite: api.Suite; scenario: api.Scenario };
 function Explorer() {
+  const [focusedResult, setFocusedResult] = useState<string>();
   const [projects, setProjects] = useState<api.Project[]>([]);
   const [projectName, setProjectName] = useState("");
   const [records, setRecords] = useState<api.Execution[]>([]);
@@ -435,26 +438,13 @@ function Explorer() {
                         </td>
                         <td>
                           {resultList.length ? (
-                            <div className="badges">
-                              {resultList.map((r) => (
-                                <Badge
-                                  key={r.id}
-                                  state={
-                                    r.invalidated_by?.length
-                                      ? "invalidated"
-                                      : r.disposition === "actionable"
-                                        ? (r.verdict ?? r.disposition)
-                                        : r.disposition
-                                  }
-                                >
-                                  {r.invalidated_by?.length
-                                    ? "invalidated · "
-                                    : ""}
-                                  {r.disposition}
-                                  {r.verdict ? ` · ${r.verdict}` : ""}
-                                </Badge>
-                              ))}
-                            </div>
+                            <ResultEntries
+                              results={resultList}
+                              onEvidence={(r) => {
+                                setFocusedResult(r.id);
+                                setSelected({ suite, scenario });
+                              }}
+                            />
                           ) : (
                             <Badge state="not_assessed">
                               {run ? `${run.status} · no Result` : "Not run"}
@@ -520,6 +510,12 @@ function Explorer() {
             <p className="eyebrow">SCENARIO / READ ONLY</p>
             <h2 id="scenario-title">{selected.scenario.name}</h2>
             <p>Suite: {selected.suite.name}</p>
+            {chosenRun && chosenResults.find((r) => r.id === focusedResult) && (
+              <ResultEvidence
+                result={chosenResults.find((r) => r.id === focusedResult)!}
+                execution={chosenRun}
+              />
+            )}
             <h3>Definition returned by the engine</h3>
             <Json value={selected.scenario} />
             <h3>Attached Contracts</h3>
@@ -559,14 +555,13 @@ function Explorer() {
                 <Json value={chosenRun} />
                 <h3>Results returned by the engine</h3>
                 {chosenResults.length ? (
-                  chosenResults.map((r) => (
-                    <details key={r.id}>
-                      <summary>
-                        {r.disposition} · {r.verdict ?? "No verdict"} · {r.id}
-                      </summary>
-                      <Json value={r} />
-                    </details>
-                  ))
+                  <ResultEntries
+                    results={chosenResults}
+                    onEvidence={(r) => {
+                      setFocusedResult(r.id);
+                      document.querySelector(".drawer")?.scrollTo({ top: 0 });
+                    }}
+                  />
                 ) : (
                   <p>No Results recorded for this Execution.</p>
                 )}
@@ -582,12 +577,13 @@ function Explorer() {
 }
 
 function App() {
-  const [page, setPage] = useState(
-    location.hash === "#connections" ? "connections" : "explorer",
-  );
+  const route = () =>
+    ["connections", "workspace", "designer"].includes(location.hash.slice(1))
+      ? location.hash.slice(1)
+      : "explorer";
+  const [page, setPage] = useState(route());
   useEffect(() => {
-    const handler = () =>
-      setPage(location.hash === "#connections" ? "connections" : "explorer");
+    const handler = () => setPage(route());
     addEventListener("hashchange", handler);
     return () => removeEventListener("hashchange", handler);
   }, []);
@@ -605,6 +601,12 @@ function App() {
         </div>
         <p className="nav-label">WORKSPACE</p>
         <nav aria-label="Main navigation">
+          <a className={page === "workspace" ? "active" : ""} href="#workspace">
+            <span>≡</span>Workspace
+          </a>
+          <a className={page === "designer" ? "active" : ""} href="#designer">
+            <span>◇</span>Visual Test Designer
+          </a>
           <a className={page === "explorer" ? "active" : ""} href="#explorer">
             <span>▦</span>Test Explorer
           </a>
@@ -616,7 +618,7 @@ function App() {
           </a>
         </nav>
         <div className="sidebar-note">
-          <span className="mini-label">STAGE 1 · UI-1</span>
+          <span className="mini-label">STAGE 1 · UI-2</span>
           <p>
             Definitions first.
             <br />
@@ -636,7 +638,14 @@ function App() {
         <header className="topbar">
           <span>
             Workspace <span className="slash">/</span>{" "}
-            {page === "explorer" ? "Test Explorer" : "Connections"}
+            {
+              {
+                explorer: "Test Explorer",
+                connections: "Connections",
+                workspace: "Workspace",
+                designer: "Visual Test Designer",
+              }[page]
+            }
           </span>
           <div>
             <span className="local-dot" /> Local only{" "}
@@ -645,7 +654,18 @@ function App() {
             </span>
           </div>
         </header>
-        <main>{page === "connections" ? <Connections /> : <Explorer />}</main>
+        <main>
+          <div hidden={page !== "workspace" && page !== "designer"}>
+            <WorkspaceScreen
+              mode={page === "designer" ? "designer" : "workspace"}
+            />
+          </div>
+          {page === "connections" ? (
+            <Connections />
+          ) : page === "explorer" ? (
+            <Explorer />
+          ) : null}
+        </main>
       </div>
     </div>
   );

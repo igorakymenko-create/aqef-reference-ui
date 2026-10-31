@@ -12,9 +12,14 @@
     "test:integration": "python -m unittest discover -s checks -v"
   },
   "dependencies": {
+    "@codemirror/lang-yaml": "6.1.2",
+    "ajv": "8.17.1",
+    "codemirror": "6.0.2",
+    "diff": "8.0.2",
     "openapi-fetch": "0.15.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "yaml": "2.8.1"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",
