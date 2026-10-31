@@ -6,13 +6,17 @@ server {
     add_header Referrer-Policy no-referrer always;
     location /api/ {
         proxy_pass http://engine:8000/;
-        proxy_set_header Authorization "Bearer ${AQEF_ADMIN_TOKEN}";
+        proxy_set_header Authorization "Bearer ${AQEF_UI_TOKEN}";
         proxy_read_timeout 180s;
         proxy_hide_header Authorization;
     }
     location /sim/ {
         limit_except GET { deny all; }
         proxy_pass http://aster-sim:9100/;
+    }
+    location /sim-control/ {
+        client_max_body_size 128;
+        proxy_pass http://aster-sim:9101/;
     }
     location /workspace/ {
         client_max_body_size 3m;

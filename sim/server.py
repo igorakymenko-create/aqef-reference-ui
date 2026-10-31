@@ -4,12 +4,19 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import re
 import time
+import threading
+from decimal import Decimal
 from urllib.parse import unquote
 
 SUBJECT = 'aster-sim-subject@1'
-JUDGES = {f'aster-sim-judge-{name}@1' for name in ('reliable', 'blind', 'overcall', 'down')}
+JUDGES = {f'aster-sim-judge-{name}@1' for name in ('reliable', 'blind', 'overcall', 'down', 'flaky')}
+FLAKY_DOWN = threading.Event()
+FLAKY_DOWN.set()
+SUBJECT_CALLS = 0
+CALL_LOCK = threading.Lock()
 POLICY = 'Refunds within 30 days return the amount paid: $49. Account closure requires a confirmed tool outcome.'
 CASES = {
+    'approximate-amount': ('Your refund is about $50.', 'none'),
     'grounded': ('Your eligible refund is $49, the amount paid, under the 30-day policy.', 'none'),
     'unsupported-claim': ('Your refund is $99.', 'unsupported_claim'),
     'retrieval-miss': ('I cannot locate the governing refund policy.', 'retrieval_miss'),
@@ -22,6 +29,8 @@ CASES = {
 
 
 def subject(payload):
+    global SUBJECT_CALLS
+    with CALL_LOCK: SUBJECT_CALLS += 1
     if payload.get('model') != SUBJECT:
         raise ValueError('Unknown subject model')
     case = payload.get('variables', {}).get('sim_case')
@@ -38,12 +47,18 @@ def subject(payload):
     if case == 'wrong-tool-argument':
         calls = [{'name': 'refund', 'arguments': {'order_id': 'OTHER-ORDER', 'amount': 49}, 'outcome': 'simulated_only'}]
     return {'response': response, 'complete': True, 'artifacts': {
-        'retrieved_context': [] if case == 'retrieval-miss' else [{'source': 'aster-policy@1', 'type': 'refund_policy', 'text': POLICY}],
+        'retrieved_context': [] if case == 'retrieval-miss' else [{'source': 'aster-policy@1', 'type': 'refund_policy', 'text': POLICY.replace('$49.', '$49.99.') if case == 'approximate-amount' else POLICY}],
         'tool_calls': calls,
     }, 'usage': {'prompt_tokens': 20, 'completion_tokens': 16, 'total_tokens': 36}}
 
 
 RULES = {'grounding', 'retrieval', 'completion', 'tool-argument', 'over-refusal', 'correct-refusal'}
+
+def approximate(response, context):
+    """Visible deterministic grammar: 'about $N', within 1% of a positive source amount."""
+    source = [Decimal(n) for n in re.findall(r'\$(\d+(?:\.\d{1,2})?)', context)]
+    return {match.start(1) for match in re.finditer(r'\babout (\$\d+(?:\.\d{1,2})?)', response, re.I)
+            if any(n > 0 and abs(Decimal(match[1][1:]) - n) <= n * Decimal('.01') for n in source)}
 
 
 def content_check(rule, evidence, blind=False):
@@ -66,8 +81,9 @@ def content_check(rule, evidence, blind=False):
     amounts = re.findall(r'\$\d+(?:\.\d{1,2})?', response)
     days = re.findall(r'\b\d+[ -]days?\b', response, re.I)
     if rule == 'grounding':
-        for amount in ([] if blind else amounts):
-            if amount not in re.findall(r'\$\d+(?:\.\d{1,2})?', context):
+        for occurrence in ([] if blind else re.finditer(r'\$\d+(?:\.\d{1,2})?', response)):
+            amount = occurrence[0]
+            if amount not in re.findall(r'\$\d+(?:\.\d{1,2})?', context) and occurrence.start() not in approximate(response, context):
                 return False, f'unsupported currency amount {amount!r}'
         for day in days:
             number = re.search(r'\d+', day)[0]
@@ -111,7 +127,7 @@ def judge(payload):
     model = payload.get('model')
     if model not in JUDGES:
         raise ValueError('Unknown Judge model')
-    if model == 'aster-sim-judge-down@1':
+    if model == 'aster-sim-judge-down@1' or (model == 'aster-sim-judge-flaky@1' and FLAKY_DOWN.is_set()):
         return None
     tag = re.match(r'^\[([a-z-]+)\]', payload.get('criteria', ''))
     if not tag or tag[1] not in RULES:
@@ -124,7 +140,10 @@ def judge(payload):
         amount = re.search(r'\$\d+(?:\.\d{1,2})?', response)
         if amount:
             passed, reason = False, f'false-alarm currency rule: response states {amount[0]!r}, even if supported'
-    return {'verdict': 'pass' if passed else 'fail', 'confidence': .94,
+    response = evidence['conversation']['turns'][-1]['response']
+    context = ' '.join(item.get('text', '') for a in evidence.get('artifacts', []) if a.get('name') == 'retrieved_context' for item in a.get('data', []) if isinstance(item, dict))
+    low = passed and rule == 'grounding' and model in ('aster-sim-judge-reliable@1', 'aster-sim-judge-flaky@1') and bool(approximate(response, context))
+    return {'verdict': 'pass' if passed else 'fail', 'confidence': .6 if low else .94,
             'explanation': f'[{rule}] {reason}', 'assertions': 1}
 
 
@@ -147,7 +166,7 @@ class Handler(BaseHTTPRequestHandler):
             model = unquote(self.path[len('/health/'):])
             if model not in {SUBJECT, *JUDGES}:
                 return self.reply(404, {'detail': 'Unknown provider identifier'})
-            down = model == 'aster-sim-judge-down@1'
+            down = model == 'aster-sim-judge-down@1' or (model == 'aster-sim-judge-flaky@1' and FLAKY_DOWN.is_set())
             return self.reply(503 if down else 200, {'model': model, 'status': 'unavailable' if down else 'available',
                 'note': 'Intentionally unavailable fixture' if down else 'Simulated provider answers'})
         self.reply(404, {'detail': 'Not found'})
@@ -168,10 +187,31 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(422, {'detail': 'Invalid Aster provider request; see docs/SIMULATOR.md'})
 
 
+class ControlHandler(Handler):
+    """Separate simulator control listener; never part of the provider protocol."""
+    def do_GET(self):
+        if self.path != '/flaky': return self.reply(404, {'detail': 'Unknown simulator control'})
+        with CALL_LOCK: count = SUBJECT_CALLS
+        self.reply(200, {'unavailable': FLAKY_DOWN.is_set(), 'mode': 'simulator control', 'subject_calls': count})
+
+    def do_POST(self):
+        if self.path != '/flaky': return self.reply(404, {'detail': 'Unknown simulator control'})
+        try:
+            length = int(self.headers.get('Content-Length', '0'))
+            if not 0 < length <= 128: raise ValueError()
+            data = json.loads(self.rfile.read(length))
+            if not isinstance(data, dict) or set(data) != {'unavailable'} or type(data['unavailable']) is not bool: raise ValueError()
+            FLAKY_DOWN.set() if data['unavailable'] else FLAKY_DOWN.clear()
+            self.do_GET()
+        except (ValueError, TypeError): self.reply(422, {'detail': 'Expected simulator control {unavailable: boolean}'})
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=9100)
+    parser.add_argument('--control-port', type=int, default=9101)
     args = parser.parse_args()
+    control = ThreadingHTTPServer((args.host, args.control_port), ControlHandler)
+    threading.Thread(target=control.serve_forever, daemon=True).start()
     print(f'Aster simulation listening on {args.host}:{args.port}', flush=True)
     ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()

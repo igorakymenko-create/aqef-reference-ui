@@ -31,6 +31,7 @@ services:
       timeout: 3s
       retries: 30
   aster-sim:
+    ports: ["127.0.0.1:9101:9101"]
     build:
       context: .
       dockerfile: docker/sim.Dockerfile

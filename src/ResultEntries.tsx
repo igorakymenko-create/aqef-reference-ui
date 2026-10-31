@@ -14,7 +14,8 @@ function oracleLabel(result: Result) {
       ? "Validator"
       : result.oracle_type === "judge"
         ? "Judge"
-        : result.oracle_type === "human"
+        : result.oracle_type === "human" ||
+            result.oracle_type === "human_reviewer"
           ? "Human Reviewer"
           : result.oracle_type;
   let identifier = result.oracle;

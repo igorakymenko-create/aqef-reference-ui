@@ -10,8 +10,8 @@ test("sample is loaded, search filters, Scenario opens read-only", async ({
   await expect(
     page.getByRole("button", { name: "grounded-refund", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText("Not run", { exact: true })).toHaveCount(8);
-  await expect(page.getByText("No Baseline", { exact: true })).toHaveCount(8);
+  await expect(page.getByText("Not run", { exact: true })).toHaveCount(12);
+  await expect(page.getByText("No Baseline", { exact: true })).toHaveCount(12);
   await page.screenshot({
     path: ".local/explorer-desktop.png",
     fullPage: true,
@@ -43,7 +43,7 @@ test("Connections distinguishes deliberately unavailable Judge", async ({
     page.getByRole("heading", { name: "Connections", exact: true }),
   ).toBeVisible();
   await expect(page.getByText("available", { exact: true })).toHaveCount(4);
-  await expect(page.getByText("unavailable", { exact: true })).toHaveCount(1);
+  await expect(page.getByText("unavailable", { exact: true })).toHaveCount(2);
   await expect(
     page.getByText("No secret_ref is used in Stage 1.", { exact: false }),
   ).toBeVisible();
@@ -110,7 +110,7 @@ test("real run appears with engine Results and opens frozen Evidence", async ({
   await page.reload();
   await expect(
     page.getByText("counts, not a verdict", { exact: true }),
-  ).toHaveCount(8);
+  ).toHaveCount(12);
   await expect(page.locator(".scenario-result-details[open]")).toHaveCount(0);
   await page
     .locator("tbody tr")

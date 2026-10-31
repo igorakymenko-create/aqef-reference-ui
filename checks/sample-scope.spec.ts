@@ -10,6 +10,10 @@ const scoped: Record<string, string[]> = {
   "correct-refusal": ["correct-refusal"],
   "over-refusal": ["over-refusal"],
   "slow-response": [],
+  "approximate-amount": ["grounding"],
+  "recoverable-outage": ["grounding"],
+  "human-signoff": ["human-signoff"],
+  "panel-disagreement": ["grounding"],
 };
 test("review sample scope change through shared Apply, run Suite and inspect every Judge property", async ({
   page,
@@ -30,6 +34,12 @@ test("review sample scope change through shared Apply, run Suite and inspect eve
   const general = project.contracts.find(
     (contract: any) => contract.name === "support-quality",
   );
+  const suite = project.suites.find(
+    (s: any) => s.name === "support-behaviours",
+  );
+  for (const scenario of sample.suites[0].scenarios)
+    if (!suite.scenarios.some((s: any) => s.name === scenario.name))
+      suite.scenarios.push(scenario);
   general.expectations = (general.expectations ?? []).filter(
     (clause: any) => !ids.has(clause.id),
   );
@@ -80,7 +90,7 @@ test("review sample scope change through shared Apply, run Suite and inspect eve
   );
   expect(response.status()).toBe(201);
   const batch = await response.json();
-  expect(batch.executions).toHaveLength(8);
+  expect(batch.executions).toHaveLength(12);
   for (const execution of batch.executions) {
     expect(execution.status).toBe("completed");
     expect(

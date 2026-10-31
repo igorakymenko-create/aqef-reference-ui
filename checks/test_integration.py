@@ -55,9 +55,10 @@ class Integration(unittest.IsolatedAsyncioTestCase):
         response = await self.client.post('/projects/aster-support/executions', json={'suite': 'support-behaviours', 'environment': 'local-simulation'})
         self.assertEqual(response.status_code, 201, response.text)
         batch = response.json()
-        self.assertEqual(len(batch['executions']), 8)
+        self.assertEqual(len(batch['executions']), 12)
         all_results = []
         scoped = {'grounded-refund': ['grounding', 'retrieval'], 'unsupported-claim': ['grounding'], 'retrieval-miss': ['retrieval'], 'claimed-completion': ['completion'], 'wrong-tool-argument': ['tool-argument'], 'correct-refusal': ['correct-refusal'], 'over-refusal': ['over-refusal'], 'slow-response': []}
+        scoped.update({'approximate-amount':['grounding'], 'recoverable-outage':['grounding'], 'human-signoff':['human-signoff'], 'panel-disagreement':['grounding']})
         for execution in batch['executions']:
             self.assertEqual(execution['status'], 'completed', execution)
             records = (await self.client.get(f'/projects/aster-support/executions/{execution["id"]}/results')).json()
@@ -89,7 +90,7 @@ class Integration(unittest.IsolatedAsyncioTestCase):
                 payload = {'criteria': '[grounding] Support according to policy', 'confidence_source': 'self_rating', 'evidence': {'conversation': {'turns': [{'prompt': prompts.get(case,'What is the refund policy?'), 'response': data['response']}]}, 'artifacts': artifacts}}
                 for model in sorted(JUDGES):
                     verdict = await client.post('/judge', json={**payload, 'model': model})
-                    if 'down@1' in model:
+                    if 'down@1' in model or 'flaky@1' in model:
                         self.assertEqual(verdict.status_code, 503)
                         self.assertNotIn('verdict', verdict.json())
                     else:
@@ -131,6 +132,12 @@ class Pin(unittest.TestCase):
 
 
 class ContentRules(unittest.TestCase):
+    def test_approximate_amount_grammar_and_low_confidence(self):
+        for response, verdict, rating in [('Your refund is about $50.', 'pass', .6), ('Your refund is $50.', 'fail', .94), ('Your refund is about $51.', 'fail', .94), ('Your refund is $49.99.', 'pass', .94), ('About $50, exactly $50.', 'fail', .94)]:
+            payload = self.payload(response, context='Your paid amount is $49.99.')
+            result = judge(payload)
+            self.assertEqual((result['verdict'], result['confidence']), (verdict, rating))
+
     def payload(self, response, context='Refunds within 30 days return $49.', prompt='What is my refund?', calls=None):
         return {'model':'aster-sim-judge-reliable@1','criteria':'[grounding] Ground claims in context','evidence':{
             'conversation':{'turns':[{'prompt':prompt,'response':response}]},
