@@ -32,6 +32,13 @@ is offered. Remove obsolete documents using your normal filesystem/git workflow.
 
 ## YAML documents
 
+UI-5 declarations are auxiliary documents wrapped in `admission_plan`, stored under
+`admissions/plans/`. They include the Reference Set snapshot, exact Oracle, Person,
+time, declared/current thresholds and any change after results were seen. They use
+the same file revision checks but are not configuration applied to the engine.
+Generated diagnostic Project/Suite files under `admissions/suites/` are ordinary
+configuration and use Review & Apply. Control forms edit the same Project YAML.
+
 The canonical sample is `project.yaml` with one `project: <Project mapping>` wrapper.
 Project environments, Suites, Scenarios, Datasets, Contracts and Gates may be inline.
 Additional documents can share a file using YAML `---`, or use separate files:

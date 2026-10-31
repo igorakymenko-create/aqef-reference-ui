@@ -1325,8 +1325,78 @@ summary {
 .sidebar {
   overflow-y: auto;
 }
-.run-control label, .run-filters label, .review-form label, .run-project-label { display:flex; flex-direction:column; gap:8px; margin:12px 0; font-size:12px; }
-.run-control select, .run-filters select, .run-filters input, .review-form select, .review-form input, .review-form textarea, .run-project-label select { width:100%; min-width:0; border:1px solid #cbd8bd; border-radius:6px; background:#fafbf7; padding:11px; color:inherit; font:inherit; }
-.run-project-label { max-width:300px; }
-.review-form textarea { min-height:90px; }
-.chain-link, .panel-member, .chain-record-heading { overflow-wrap:anywhere; }
+.trust-screen label,
+.run-control label,
+.run-filters label,
+.review-form label,
+.run-project-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 12px;
+}
+.trust-screen select,
+.trust-screen input,
+.trust-screen textarea,
+.run-control select,
+.run-filters select,
+.run-filters input,
+.review-form select,
+.review-form input,
+.review-form textarea,
+.run-project-label select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #cbd8bd;
+  border-radius: 6px;
+  background: #fafbf7;
+  padding: 11px;
+  color: inherit;
+  font: inherit;
+}
+.run-project-label {
+  max-width: 300px;
+}
+.review-form textarea {
+  min-height: 90px;
+}
+.chain-link,
+.panel-member,
+.chain-record-heading {
+  overflow-wrap: anywhere;
+}
+.workflow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+.workflow-steps li {
+  border: 1px solid #cad6be;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 12px;
+}
+.workflow-steps [aria-current="step"] {
+  background: #dbe8cc;
+  font-weight: 650;
+}
+.agreement-arithmetic,
+.control-record,
+.admission-record {
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #d6dfce;
+  border-radius: 9px;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+.designer-form input[type="checkbox"] {
+  width: auto;
+}
+.control-record table {
+  table-layout: fixed;
+  width: 100%;
+}

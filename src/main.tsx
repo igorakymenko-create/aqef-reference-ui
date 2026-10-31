@@ -5,6 +5,8 @@ import { ResultEntries, ResultEvidence, ResultCounts } from "./ResultEntries";
 import { WorkspaceScreen } from "./workspace/WorkspaceScreen";
 import { RunsScreen } from "./runs/RunsScreen";
 import { SimulatorControl } from "./runs/SimulatorControl";
+import { AdmissionScreen } from "./trust/AdmissionScreen";
+import { ControlsScreen } from "./trust/ControlsScreen";
 import "./style.css";
 
 function Badge({
@@ -194,7 +196,11 @@ function Explorer() {
         if (!active) return;
         setProjects(data);
         setProjectName((name) =>
-          data.some((p) => p.name === name) ? name : (data[0]?.name ?? ""),
+          data.some((p) => p.name === name)
+            ? name
+            : (data.find((p) => !p.name.startsWith("admission-"))?.name ??
+              data[0]?.name ??
+              ""),
         );
         if (!data.length) setBusy(false);
       })
@@ -583,7 +589,8 @@ function Explorer() {
 
 function App() {
   const route = () =>
-    location.hash.slice(1).startsWith("runs")
+    location.hash.slice(1).startsWith("runs") ||
+    location.hash.slice(1).startsWith("controls")
       ? location.hash.slice(1)
       : [
             "connections",
@@ -591,6 +598,8 @@ function App() {
             "designer",
             "validators",
             "judges",
+            "admission",
+            "control-designer",
           ].includes(location.hash.slice(1))
         ? location.hash.slice(1)
         : "explorer";
@@ -614,6 +623,15 @@ function App() {
         </div>
         <p className="nav-label">WORKSPACE</p>
         <nav aria-label="Main navigation">
+          <a href="#admission" className={page === "admission" ? "active" : ""}>
+            <span>✓</span>Admission
+          </a>
+          <a
+            href="#controls"
+            className={page.startsWith("controls") ? "active" : ""}
+          >
+            <span>◈</span>Seeded Controls
+          </a>
           <a className={page === "workspace" ? "active" : ""} href="#workspace">
             <span>≡</span>Workspace
           </a>
@@ -643,7 +661,7 @@ function App() {
           </a>
         </nav>
         <div className="sidebar-note">
-          <span className="mini-label">STAGE 1 · UI-4</span>
+          <span className="mini-label">STAGE 1 · UI-5</span>
           <p>
             Definitions first.
             <br />
@@ -672,7 +690,16 @@ function App() {
                 validators: "Validator Designer",
                 judges: "Judge Configuration",
                 runs: "Runs and Evidence",
-              }[page.startsWith("runs") ? "runs" : page]
+                admission: "Admission",
+                controls: "Seeded Controls",
+                "control-designer": "Control Scenario Designer",
+              }[
+                page.startsWith("runs")
+                  ? "runs"
+                  : page.startsWith("controls")
+                    ? "controls"
+                    : page
+              ]
             }
           </span>
           <div>
@@ -685,14 +712,21 @@ function App() {
         <main>
           <div
             hidden={
-              !["workspace", "designer", "validators", "judges"].includes(page)
+              ![
+                "workspace",
+                "designer",
+                "validators",
+                "judges",
+                "control-designer",
+              ].includes(page)
             }
           >
             <WorkspaceScreen
               mode={
                 page === "designer" ||
                 page === "validators" ||
-                page === "judges"
+                page === "judges" ||
+                page === "control-designer"
                   ? page
                   : "workspace"
               }
@@ -704,6 +738,10 @@ function App() {
             <Explorer />
           ) : page.startsWith("runs") ? (
             <RunsScreen route={page} />
+          ) : page === "admission" ? (
+            <AdmissionScreen />
+          ) : page.startsWith("controls") ? (
+            <ControlsScreen route={page} />
           ) : null}
         </main>
       </div>

@@ -29,11 +29,15 @@ project:
       expected:
         type: string
         minLength: 1
+      defect_classes:
+      - response_structure
     - id: response-latency
       validator: latency
       target: artifacts.latency_ms
       dimension: operational
       expected: 200
+      defect_classes:
+      - operational_latency
     policies:
       validator_composition: AND
   quality_gates:
@@ -239,3 +243,194 @@ project:
               method: voting
               threshold: unanimous
               on_disagreement: human_review
+  - name: instrument-checks
+    scenarios:
+    - name: unsupported-defect
+      seeded_control:
+        kind: defect
+        defect_class: unsupported_claim
+        confirmed_by: construction
+        planted_defect: A dollar amount unsupported by the policy
+      evidence:
+        conversation:
+          turns:
+          - prompt: Original defect question
+            response: Your refund is $99.
+        artifacts:
+          retrieved_context:
+          - source: reference-policy
+            type: refund_policy
+            text: Refunds within 30 days return $49.
+          latency_ms: 1
+      contract:
+        expectations:
+        - id: blind-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-blind@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+        - id: overcall-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-overcall@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: faithful-clean
+      seeded_control:
+        kind: clean
+        defect_class: unsupported_claim
+        confirmed_by: construction
+      evidence:
+        conversation:
+          turns:
+          - prompt: Original clean question
+            response: The paid $49 will be returned.
+        artifacts:
+          retrieved_context:
+          - source: reference-policy
+            type: refund_policy
+            text: Refunds within 30 days return $49.
+          latency_ms: 1
+      contract:
+        expectations:
+        - id: blind-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-blind@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+        - id: overcall-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-overcall@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: awaiting-confirmation
+      prompt:
+        template: What is the refund?
+      variables:
+        sim_case: unsupported-claim
+      seeded_control:
+        kind: defect
+        defect_class: unsupported_claim
+        planted_defect: Unsupported amount $99
+        confirmed_by: human_reviewer
+      contract:
+        expectations:
+        - id: human-confirmed-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-reliable@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: blind-subject-check
+      prompt:
+        template: What is my $49 refund?
+      variables:
+        sim_case: grounded
+      contract:
+        expectations:
+        - id: blind-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-blind@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: overcall-subject-check
+      prompt:
+        template: What is my $49 refund?
+      variables:
+        sim_case: grounded
+      contract:
+        expectations:
+        - id: overcall-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-overcall@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: reliable-subject-check
+      prompt:
+        template: What is my $49 refund?
+      variables:
+        sim_case: grounded
+      contract:
+        expectations:
+        - id: reliable-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-reliable@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+  - name: fresh-instrument-checks
+    scenarios:
+    - name: fresh-defect
+      seeded_control:
+        kind: defect
+        defect_class: unsupported_claim
+        confirmed_by: construction
+        planted_defect: A dollar amount unsupported by the policy
+      evidence:
+        conversation:
+          turns:
+          - prompt: Fresh policy inspection D-2
+            response: The supported refund is $68.
+        artifacts:
+          retrieved_context:
+          - source: reference-policy
+            type: refund_policy
+            text: Refunds within 30 days return $67.40.
+          latency_ms: 1
+      contract:
+        expectations:
+        - id: corrected-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-reliable@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: fresh-clean
+      seeded_control:
+        kind: clean
+        defect_class: unsupported_claim
+        confirmed_by: construction
+      evidence:
+        conversation:
+          turns:
+          - prompt: Fresh policy inspection C-2
+            response: We return the paid $67.40 under the 30-day policy.
+        artifacts:
+          retrieved_context:
+          - source: reference-policy
+            type: refund_policy
+            text: Refunds within 30 days return $67.40.
+          latency_ms: 1
+      contract:
+        expectations:
+        - id: corrected-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-reliable@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8

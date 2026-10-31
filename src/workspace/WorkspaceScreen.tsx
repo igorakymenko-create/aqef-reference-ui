@@ -3,6 +3,7 @@ import { Designer } from "./Designer";
 import { YamlEditor } from "./YamlEditor";
 import { FileTree } from "./FileTree";
 import { ValidatorDesigner } from "./ValidatorDesigner";
+import { ControlDesigner } from "./ControlDesigner";
 import { JudgeDesigner } from "./JudgeDesigner";
 import { oracleChecks } from "./oracleRules";
 import { providers as readProviders } from "../api";
@@ -26,7 +27,7 @@ import {
 export function WorkspaceScreen({
   mode,
 }: {
-  mode: "workspace" | "designer" | "validators" | "judges";
+  mode: "workspace" | "designer" | "validators" | "judges" | "control-designer";
 }) {
   const [providerMap, setProviderMap] = useState<Record<string, string>>({}),
     [handoff, setHandoff] = useState<Data>();
@@ -127,6 +128,46 @@ export function WorkspaceScreen({
     if (message) setVisual(undefined);
   }, []);
   useEffect(() => {
+    const receive = (event: Event) => {
+      const e = event as CustomEvent<{ path: string; content: string }>;
+      if (
+        original &&
+        effective !== original.content &&
+        !window.confirm(
+          "Discard the unsaved workspace draft to review this generated source?",
+        )
+      ) {
+        e.preventDefault();
+        return;
+      }
+      ++loadSequence.current;
+      setBusy(true);
+      void readAll()
+        .then((files) => {
+          const source = files.find((s) => s.path === e.detail.path) ?? {
+            path: e.detail.path,
+            content: "",
+            etag: null,
+          };
+          setSources(
+            files.some((s) => s.path === source.path)
+              ? files
+              : [...files, source],
+          );
+          setActive(source.path);
+          setDraft(e.detail.content);
+          setVisual(undefined);
+          setFormError("");
+          setPlan(undefined);
+          setGeneration((n) => n + 1);
+        })
+        .catch((err) => setError(String(err)))
+        .finally(() => setBusy(false));
+    };
+    window.addEventListener("aqef-propose-source", receive);
+    return () => window.removeEventListener("aqef-propose-source", receive);
+  }, [sources, original, effective]);
+  useEffect(() => {
     const listener = (event: BeforeUnloadEvent) => {
       if (original && effective !== original.content) {
         event.preventDefault();
@@ -212,6 +253,7 @@ export function WorkspaceScreen({
                 designer: "Visual Test Designer",
                 validators: "Validator Designer",
                 judges: "Judge Configuration",
+                "control-designer": "Control Scenario Designer",
               }[mode]
             }
           </h1>
@@ -296,6 +338,13 @@ export function WorkspaceScreen({
                 setHandoff(data);
                 window.location.hash = "judges";
               }}
+            />
+          ) : mode === "control-designer" ? (
+            <ControlDesigner
+              key={`${active}:${generation}`}
+              content={draft}
+              onChange={setVisual}
+              onError={handleFormError}
             />
           ) : mode === "judges" ? (
             <JudgeDesigner

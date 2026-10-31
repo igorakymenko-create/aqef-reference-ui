@@ -143,6 +143,10 @@ def judge(payload):
     response = evidence['conversation']['turns'][-1]['response']
     context = ' '.join(item.get('text', '') for a in evidence.get('artifacts', []) if a.get('name') == 'retrieved_context' for item in a.get('data', []) if isinstance(item, dict))
     low = passed and rule == 'grounding' and model in ('aster-sim-judge-reliable@1', 'aster-sim-judge-flaky@1') and bool(approximate(response, context))
+    if low:
+        match = next(m for m in re.finditer(r'\babout (\$\d+(?:\.\d{1,2})?)', response, re.I) if m.start(1) in approximate(response, context))
+        source = next(a for a in re.findall(r'\$\d+(?:\.\d{1,2})?', context) if Decimal(a[1:]) > 0 and abs(Decimal(match[1][1:])-Decimal(a[1:])) <= Decimal(a[1:])*Decimal('.01'))
+        reason = f'approximate amount {match[0]!r} is close to {source!r} in context; exact amount not stated'
     return {'verdict': 'pass' if passed else 'fail', 'confidence': .6 if low else .94,
             'explanation': f'[{rule}] {reason}', 'assertions': 1}
 

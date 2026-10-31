@@ -1,5 +1,58 @@
 # Implementation notes
 
+## UI-5 — Admission, Seeded Controls and readable Evidence
+
+Completed the UI-4 presentation corrections first: Conversation/Artifacts/Results
+precede the collapsed frozen configuration; criteria/explanation/chain position are
+plain, raw Oracle/provider/attempts/full records are disclosed, panel members are a
+table. The low-Confidence approximation now explains its uncertainty without changing
+its verdict or rating. No recorded Evidence is rewritten.
+
+S-7 records pre-results declarations with Person/time and Reference Set snapshots in
+auxiliary workspace YAML, generates fixed-Evidence diagnostics through shared Review
+& Apply, runs the pinned engine, presents independent agreement arithmetic and submits
+only documented Admission fields. Exposure filtering, undefined measures and incomplete
+measurements are explicit. Later threshold changes remain visible and persisted;
+accepted records are append-only and their last admitted flag decides status. Exact
+model/criteria/confidence_source identity separates workflows. Diagnostic Projects and
+classes prevent their construction-control misses from disqualifying product Oracles.
+
+S-9 adds shared-YAML control authoring and batch views of engine control records apart
+from product Results. Actual invalidated_by links go both ways and retain the original
+verdict. Permission-gated Human confirmation, explicit full-run invalidation and
+Requalification show engine outcomes/refusals verbatim. Corrected assessment uses
+engine-recorded candidate Oracles and appends resolving Results against stored Evidence;
+freshness, chronology, complete kind coverage and compatibility remain engine decisions.
+
+The sample has a versioned 20-item illustrative Reference Set and eight new instrument
+Scenarios across original/fresh control Suites (20 Scenarios total). General schema and
+latency Constraints declare their own classes instead of claiming unsupported-amount
+coverage. No engine source, file-service semantics, authentication contract or package
+dependency changed. API/provenance choices and SHOULD limitations are UI-A21–UI-A25.
+
+Independent verification covers the 2×2 arithmetic against separate calculations,
+undefined/single-class scores, exact Admission request fields and acceptance order,
+exposure exclusion, declaration files, threshold change provenance, multi-document
+control authoring, engine misses/false alarms/invalid controls, negative confirmation
+refusal, actual invalidated_by links, reused-control refusal, fresh Requalification
+and corrected actionable chains without subject calls. The full UI-1–UI-5 browser
+suite contains 36 checks; the Python suite contains 12, including exact vendor hashes.
+The production TypeScript/Vite and four-service Compose builds pass. Built nginx
+checks include the owned-sample Review & Apply migration, six deployment regressions
+and eight UI-5 workflows. Fresh sample Projects used by the latter are explicit
+shared-Apply resources so earlier control exposure is preserved rather than cleared.
+Desktop Evidence/Admission and 390px Admission/Controls were visually reviewed;
+both narrow workflows have no horizontal page overflow. No external test material
+was accessed and no CTS or external inspection pass is claimed.
+
+After a coordinated Compose stop/rebuild/start, all 298 then-existing Execution IDs
+across the sample/diagnostic Projects and all 14 workspace SHA-256 revisions matched
+exactly, including saved Admission plans. Both active browser assets contained neither
+server credential. Persistent-deployment regression checks allow 120 seconds per
+workflow and 30 seconds for visible data: this pin's history/control reads on the
+accumulated database can exceed short development waits. No history is cleared to
+make those checks pass.
+
 ## UI-4 — Runs and Evidence
 
 Added S-8 over the pinned engine API: synchronous new-batch execution without Gates,

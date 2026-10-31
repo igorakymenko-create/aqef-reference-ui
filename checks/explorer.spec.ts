@@ -10,15 +10,15 @@ test("sample is loaded, search filters, Scenario opens read-only", async ({
   await expect(
     page.getByRole("button", { name: "grounded-refund", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText("Not run", { exact: true })).toHaveCount(12);
-  await expect(page.getByText("No Baseline", { exact: true })).toHaveCount(12);
+  await expect(page.getByText("Not run", { exact: true })).toHaveCount(20);
+  await expect(page.getByText("No Baseline", { exact: true })).toHaveCount(20);
   await page.screenshot({
     path: ".local/explorer-desktop.png",
     fullPage: true,
   });
   await page
     .getByRole("textbox", { name: "Search Scenarios" })
-    .fill("unsupported");
+    .fill("unsupported-claim");
   await expect(page.locator("tbody tr")).toHaveCount(1);
   await page
     .getByRole("button", { name: "Inspect unsupported-claim", exact: true })
@@ -112,13 +112,12 @@ test("real run appears with engine Results and opens frozen Evidence", async ({
     page.getByText("counts, not a verdict", { exact: true }),
   ).toHaveCount(12);
   await expect(page.locator(".scenario-result-details[open]")).toHaveCount(0);
-  await page
+  const unsupported = page
     .locator("tbody tr")
-    .filter({ hasText: "unsupported-claim" })
-    .locator("summary")
-    .click();
+    .filter({ hasText: "unsupported-claim" });
+  await unsupported.locator("summary").click();
   await expect(
-    page.getByText("actionable · fail", { exact: true }).first(),
+    unsupported.getByText("actionable · fail", { exact: true }).first(),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Inspect unsupported-claim", exact: true })

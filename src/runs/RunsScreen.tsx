@@ -43,7 +43,11 @@ export function RunsScreen({ route }: { route: string }) {
     readProjects()
       .then((data) => {
         setProjects(data);
-        setProject(data[0]?.name ?? "");
+        setProject(
+          data.find((p) => !p.name.startsWith("admission-"))?.name ??
+            data[0]?.name ??
+            "",
+        );
       })
       .catch(setError);
   }, []);
@@ -356,7 +360,13 @@ export function RunsScreen({ route }: { route: string }) {
             {entries[0].environment} · {entries.length} matching Executions
           </p>
           <ResultCounts
-            results={entries.flatMap((e) => results[e.id] ?? [])}
+            results={entries
+              .filter(
+                (e) =>
+                  !(e.configuration as Record<string, any>)?.scenario
+                    ?.seeded_control,
+              )
+              .flatMap((e) => results[e.id] ?? [])}
             onEvidence={(r) => {
               const e = entries.find((e) =>
                 (results[e.id] ?? []).some((item) => item.id === r.id),
@@ -365,6 +375,26 @@ export function RunsScreen({ route }: { route: string }) {
             }}
           />
           {rows(entries)}
+          {entries.some(
+            (e) =>
+              (e.configuration as Record<string, any>)?.scenario
+                ?.seeded_control,
+          ) && (
+            <p>
+              Seeded Control Results are separate and never enter quality
+              aggregates.{" "}
+              <a
+                href={
+                  "#controls/" +
+                  encodeURIComponent(project) +
+                  "/" +
+                  encodeURIComponent(id)
+                }
+              >
+                Inspect controls and per-Oracle outcomes →
+              </a>
+            </p>
+          )}
         </section>
       ))}
       {!busy && !error && grouped.length === 0 && (

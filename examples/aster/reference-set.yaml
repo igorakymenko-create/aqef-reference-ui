@@ -1,15 +1,311 @@
-# Human-authored labels for simulated cases. Not an Admission record or AQEF schema.
-# No Admission is pre-granted. Later slices will record measurements through the API.
-name: aster-human-labelled
-version: '1'
-labelled_by: project-author
-provenance: Manually authored simulation fixtures for this UI; no CTS material used.
+name: aster-grounding
+version: '2'
+labelled_by:
+- aster-local-person
+provenance: Illustrative simulation labels for local Person review; not an independent
+  human labelling study. No external test material.
 items:
-  - {id: grounded, label: pass}
-  - {id: unsupported-claim, label: fail}
-  - {id: retrieval-miss, label: fail}
-  - {id: claimed-completion, label: fail}
-  - {id: wrong-tool-argument, label: fail}
-  - {id: correct-refusal, label: pass}
-  - {id: over-refusal, label: fail}
-  - {id: slow, label: pass}
+- id: grounding-01
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 1: what amount is supported?'
+        response: You receive $40.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $40.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+  exposed: true
+  exposed_for:
+  - '{"confidence_source":"self_rating","criteria":"[grounding] Every amount and duration
+    must be supported by retrieved policy.","model":"aster-sim-judge-reliable@1","type":"judge","version":"http-judge-v1"}'
+- id: grounding-02
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 2: what amount is supported?'
+        response: Your refund is $141.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $41.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+- id: grounding-03
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 3: what amount is supported?'
+        response: You receive $42.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $42.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+- id: grounding-04
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 4: what amount is supported?'
+        response: Your refund is $143.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $43.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+- id: grounding-05
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 5: what amount is supported?'
+        response: You receive $44.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $44.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+- id: grounding-06
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 6: what amount is supported?'
+        response: Your refund is $145.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $45.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+- id: grounding-07
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 7: what amount is supported?'
+        response: You receive $46.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $46.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+- id: grounding-08
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 8: what amount is supported?'
+        response: Your refund is $147.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $47.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+- id: grounding-09
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 9: what amount is supported?'
+        response: You receive $48.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $48.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+- id: grounding-10
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 10: what amount is supported?'
+        response: Your refund is $149.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $49.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+- id: grounding-11
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 11: what amount is supported?'
+        response: You receive $50.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $50.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+- id: grounding-12
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 12: what amount is supported?'
+        response: Your refund is $151.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $51.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+- id: grounding-13
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 13: what amount is supported?'
+        response: You receive $52.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $52.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+- id: grounding-14
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 14: what amount is supported?'
+        response: Your refund is $153.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $53.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+- id: grounding-15
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 15: what amount is supported?'
+        response: You receive $54.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $54.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+- id: grounding-16
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 16: what amount is supported?'
+        response: Your refund is $155.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $55.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+- id: grounding-17
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 17: what amount is supported?'
+        response: You receive $56.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $56.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+- id: grounding-18
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 18: what amount is supported?'
+        response: Your refund is $157.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $57.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+- id: grounding-19
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 19: what amount is supported?'
+        response: You receive $58.25 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $58.25.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+- id: grounding-20
+  evidence:
+    conversation:
+      turns:
+      - prompt: 'Policy question 20: what amount is supported?'
+        response: Your refund is $159.25.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $59.25.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person

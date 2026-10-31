@@ -130,9 +130,18 @@ export function oracleChecks(
       }
     }
   };
-  for (const [project, root] of roots)
+  for (const [project, root] of roots) {
     for (const entry of contractsIn(root))
       checkContract(project, entry.scope, entry.value);
+    for (const suite of root.suites ?? [])
+      for (const scenario of suite.scenarios ?? [])
+        if (scenario.seeded_control?.confirmation)
+          checkContract(
+            project,
+            `Control confirmation ${suite.name}/${scenario.name}`,
+            { constraints: [scenario.seeded_control.confirmation] },
+          );
+  }
   for (const resource of resources) {
     if (resource.type === "Contract")
       checkContract(
