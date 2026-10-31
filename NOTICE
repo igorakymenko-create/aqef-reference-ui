@@ -1,0 +1,8 @@
+AQEF Reference UI
+Copyright 2026 AQEF contributors
+
+This project includes the AQEF Reference Engine, unmodified at slice-12,
+commit 83c69e0defafe94e7f05282a1c2dd02c1d993d9e.
+Source: https://github.com/igorakymenko-create/aqef-reference-engine
+The engine's original Apache 2.0 licence is retained in vendor/engine/LICENSE.
+The generated TypeScript API declarations derive from that engine's OpenAPI document.

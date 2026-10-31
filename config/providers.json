@@ -1,0 +1,7 @@
+{
+  "aster-sim-subject@1": "http://aster-sim:9100/subject",
+  "aster-sim-judge-reliable@1": "http://aster-sim:9100/judge",
+  "aster-sim-judge-blind@1": "http://aster-sim:9100/judge",
+  "aster-sim-judge-overcall@1": "http://aster-sim:9100/judge",
+  "aster-sim-judge-down@1": "http://aster-sim:9100/judge"
+}
