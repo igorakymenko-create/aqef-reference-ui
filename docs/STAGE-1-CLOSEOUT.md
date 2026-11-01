@@ -51,10 +51,56 @@ The complete gap register is in `docs/STAGE-1-BRIEF.md` and `docs/AMBIGUITIES.md
 Stage 1 has its ten screen areas implemented within those declared API limits;
 external inspection and any future conformance statement remain separate work.
 
-## Verification at UI-6 delivery
+## Initial UI-6 delivery verification (historical)
 
-The production build passes. Three consecutive complete disposable runs each passed
-12 Python integration checks and 45 browser checks. The running Compose build passed
+The initial local delivery recorded a production build and three disposable runs of
+12 Python integration checks and 45 browser checks. Independent review on another
+machine did not reproduce that browser result: it exposed the SimulatorControl
+read/write race and unrelated Runs history traffic on Execution pages. The fixes
+and subsequent verification below supersede the initial result as delivery evidence.
+The initial running Compose build passed
 24 additional checks: one sample-adoption workflow, six deployment regressions, nine
 Admission/Controls workflows and eight UI-6 decision workflows. These checks use the
 unchanged pinned production engine and local simulator, not external test material.
+
+## F-1/F-2 review corrections
+
+SimulatorControl discards stale reads, disables both buttons while unknown, and has
+a route-delayed stale-response regression check in `checks/runs.spec.ts`. The original
+three-link check waits for the initial state. Execution pages no longer load the Runs
+index's Execution/Results history; `checks/trust.spec.ts` asserts that request bound
+while checking both invalidated Results. Before/after measurements and the causes
+are recorded in `docs/IMPLEMENTATION_NOTES.md`.
+
+With the owner's additional approval, the disposable check workspace isolates
+Human/Judge fixtures from the example's inherited 200ms latency Constraint. That
+unchanged check remains on slow-response and the guarded recovery Scenario. The
+test-service launcher also gives its stdlib listeners a 128-connection listen queue
+to prevent Windows connection refusals under single-CPU bursts. No production
+example, engine, simulator or file-service implementation is changed.
+
+Final verification, Windows x64 / Node 24.13.0 / Python 3.12.1 / Playwright 1.56.1:
+six consecutive `npx playwright test --reporter=line` invocations on unchanged code
+and the checked-in timeout/retry settings, with fresh disposable services each time.
+The original invalidation assertion still uses the default five-second expect limit.
+
+| Mode | Run | Complete command time | Passed | CPU mask |
+|---|---|---|---|---|
+| Normal | 1 | 182.23s | 46/46 | 0xffff |
+| Normal | 2 | 181.19s | 46/46 | 0xffff |
+| Normal | 3 | 181.22s | 46/46 | 0xffff |
+| One CPU | 1 | 272.66s | 46/46 | 0x1 |
+| One CPU | 2 | 278.19s | 46/46 | 0x1 |
+| One CPU | 3 | 279.31s | 46/46 | 0x1 |
+
+The CPU series used a Windows Job Object affinity limit for the complete process
+tree, including Vite, the engine/simulator/workspace fixtures and test Chromium.
+All sampled test processes had mask 1. The third raw audit falsely included five
+pre-existing Edge processes through recycled parent PIDs; checked StartTime values
+(20:16:33, before the roughly 20:55 test start) exclude them. The raw audit is
+retained, and this correction is documented rather than treating it as a test failure
+or silently replacing the run. Every Playwright command itself exited 0.
+
+The earlier failed prototype, latency-dependent and connection-refusal attempts are
+not counted in this final sequence. No external specification test material was
+accessed and no conformance claim is made.

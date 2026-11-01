@@ -38,6 +38,8 @@ export function RunsScreen({ route }: { route: string }) {
     [batches, setBatches] = useState<Batch[]>([]),
     [page, setPage] = useState(0);
   const sequence = useRef(0);
+  const currentRoute = useRef(route);
+  currentRoute.current = route;
   const selected = projects.find((p) => p.name === project);
   useEffect(() => {
     readProjects()
@@ -52,7 +54,7 @@ export function RunsScreen({ route }: { route: string }) {
       .catch(setError);
   }, []);
   async function load(name = project, query = applied) {
-    if (!name) return;
+    if (!name || currentRoute.current !== "runs") return;
     const number = ++sequence.current;
     setBusy(true);
     setError(undefined);
@@ -61,6 +63,8 @@ export function RunsScreen({ route }: { route: string }) {
         projectPath(name) + "/executions",
         query,
       );
+      if (number !== sequence.current || currentRoute.current !== "runs")
+        return;
       const records = await Promise.all(
         rows.map(
           async (r) =>
@@ -70,7 +74,8 @@ export function RunsScreen({ route }: { route: string }) {
             ] as const,
         ),
       );
-      if (number !== sequence.current) return;
+      if (number !== sequence.current || currentRoute.current !== "runs")
+        return;
       setExecutions(rows);
       setResults(Object.fromEntries(records));
       setPage(0);
@@ -81,6 +86,7 @@ export function RunsScreen({ route }: { route: string }) {
     }
   }
   useEffect(() => {
+    if (currentRoute.current !== "runs") return;
     setExecutions([]);
     setResults({});
     setBatches([]);
