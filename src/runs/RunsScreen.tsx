@@ -118,6 +118,7 @@ export function RunsScreen({ route }: { route: string }) {
           key={parts.slice(1).join("/")}
           project={decodeURIComponent(parts[1])}
           id={decodeURIComponent(parts[2])}
+          focusResult={parts[3] ? decodeURIComponent(parts[3]) : undefined}
         />
       );
     } catch {

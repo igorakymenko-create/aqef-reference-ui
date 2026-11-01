@@ -1,1 +1,1 @@
-{"id":"aster-local-person","kind":"person","roles":["admin","aster-reviewer"],"permissions":["read","execute","review"],"source":"Local bootstrap via engine Principal and Role APIs; action acceptance remains engine-authoritative"}
+{"id":"aster-local-person","kind":"person","roles":["admin","aster-reviewer"],"permissions":["read","execute","review","gate_override","release_decide"],"source":"Local bootstrap via engine Principal and Role APIs; current permissions are read from held Roles; action acceptance remains engine-authoritative"}

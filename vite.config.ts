@@ -2,8 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { createHash } from "node:crypto";
 import { readFileSync, existsSync } from "node:fs";
+import { Agent } from "node:http";
 
 export default defineConfig(({ command }) => {
+  // http-proxy otherwise forces Connection: close on every engine read. Reuse
+  // a bounded pool so repeated local suites do not churn Windows client ports.
+  const engineAgent = new Agent({ keepAlive: true, maxSockets: 16, maxFreeSockets: 8 });
   // Dev credential stays in this Node process; VITE_* variables are never used.
   const envFile = existsSync(".env") ? readFileSync(".env", "utf8") : "";
   const token =
@@ -38,6 +42,7 @@ export default defineConfig(({ command }) => {
         },
         "/api": {
           target: "http://127.0.0.1:8000",
+          agent: engineAgent,
           rewrite: (p) => p.replace(/^\/api/, ""),
           configure(proxy) {
             proxy.on("proxyReq", (req) =>

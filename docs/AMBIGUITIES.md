@@ -1,5 +1,63 @@
 # Ambiguities and engine gaps — UI-1 through UI-6
 
+## UI-A27 / G-8 — Stored evaluation history and override metadata reads
+
+**Source:** UI-6 D-2 says to record a missing read rather than compute aggregates;
+Appendix C and the pinned API expose POST Gates check, Report/Snapshot collections,
+and Approvals, but no GET stored Gate evaluations. Treating Report generation time as
+evaluation time or reading SQLite would invent data or bypass the API boundary.
+
+**Choice:** retain actual check responses in session memory and combine them with
+engine-owned Gate copies in saved Reports, deduplicated by Snapshot. Snapshot
+`captured_at` is explicitly labelled as such; it is never called `evaluated_at`.
+Unreported evaluations from other sessions cannot be shown. Save a Report to retain
+an API-readable copy. The limitation is visible on Gates and Dashboard, including
+Trend and latest-known override eligibility. This is not a complete global history.
+
+Approval reads can identify an accepted override by its exact target GateResult,
+but omit the POST response's approval time/Role fields. Use actual POST metadata
+when available; otherwise state that the engine did not return it. Never infer
+historical Role from current membership or call an Approval's creation time its
+approval time. Reports use only their own frozen override reference and never
+join live Approvals. The engine remains authoritative on concurrent action refusals.
+
+## UI-A28 / G-9 — Evidence membership, staleness and frozen metadata
+
+**Source:** UI-6 C-3 requires the Results listed by the engine, and D-1 prohibits
+live enrichment of a frozen Report. Check responses list evaluation-wide result_ids,
+not each Gate's contributing subset. They report stale_results at Gate level but
+do not flag individual Results stale. Frozen Report Gate copies omit result_ids,
+evaluated_at and some Gate definition/override metadata.
+
+**Choice:** open exactly the evaluation-wide IDs, group recorded Results by clause,
+and label the membership limitation. Show stale_results on its Gate/evaluation,
+without marking arbitrary individual Results stale. Missing IDs/aggregate definition
+or metadata remain explicitly missing, never reconstructed. Metric drill-down uses
+the Metric's own recorded result_ids. Evidence destinations are separate pages;
+the frozen Report itself fetches only its own document. No current configuration
+or Approval is spliced into it. No engine or file-service extension is introduced.
+
+## UI-A29 — Decision sample scope and minimum basis
+
+**Source:** UI-6 B-1 requires several semantic failure reasons in one accepted run
+and correctly scoped Gates. The original sample's inherited latency Constraint can
+short-circuit Judges before semantic Results exist. Weakening those Contracts would
+change earlier demonstrations.
+
+**Choice:** add a separate aster-support-decisions Project, ten Scenarios and five
+Project Gates. Keep the original twenty Scenarios intact. Only decision-slow has
+the latency Constraint. The safety Gate sees an awaiting_review Human Result and
+unmet min_basis, producing the engine's not_computed/insufficient_basis. Minimum
+basis alone does not guarantee not_computed at this pin: after Human completion the
+engine may return a numeric value with min_basis_met false. Display it unchanged.
+
+UI-6 B-3 calls override_requires a Role; Appendix A and the pin define it as a
+permission name. The sample requires review, supplied by the existing aster-reviewer
+Role; the Person also holds admin's gate_override and release_decide. Bootstrap uses
+the documented APIs and verifies permissions without overwriting existing identities.
+The engine chooses the recorded approval_role; the UI shows that value, which may
+be admin rather than aster-reviewer.
+
 ## UI-A26 — An invalid control outcome has no recorded diagnosis at this pin
 
 Owner UI-6 A-2 requires the actual reason and prohibits labelling a confirmed control

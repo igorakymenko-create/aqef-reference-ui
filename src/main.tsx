@@ -7,6 +7,11 @@ import { RunsScreen } from "./runs/RunsScreen";
 import { SimulatorControl } from "./runs/SimulatorControl";
 import { AdmissionScreen } from "./trust/AdmissionScreen";
 import { ControlsScreen } from "./trust/ControlsScreen";
+import { GatesScreen } from "./decisions/GatesScreen";
+import { ReportsScreen, ReportDocument } from "./decisions/ReportsScreen";
+import { Dashboard } from "./decisions/Dashboard";
+import { ReleasesScreen } from "./decisions/ReleasesScreen";
+import { ResultLocator, MetricEvidence } from "./decisions/Evidence";
 import "./style.css";
 
 function Badge({
@@ -588,27 +593,40 @@ function Explorer() {
 }
 
 function App() {
-  const route = () =>
-    location.hash.slice(1).startsWith("runs") ||
-    location.hash.slice(1).startsWith("controls")
-      ? location.hash.slice(1)
-      : [
-            "connections",
-            "workspace",
-            "designer",
-            "validators",
-            "judges",
-            "admission",
-            "control-designer",
-          ].includes(location.hash.slice(1))
-        ? location.hash.slice(1)
-        : "explorer";
+  const route = () => {
+    const value = location.hash.slice(1),
+      prefix = value.split("/")[0];
+    return [
+      "runs",
+      "controls",
+      "admission",
+      "gates",
+      "reports",
+      "report",
+      "dashboard",
+      "releases",
+      "result",
+      "metric",
+    ].includes(prefix) ||
+      [
+        "connections",
+        "workspace",
+        "designer",
+        "validators",
+        "judges",
+        "control-designer",
+      ].includes(value)
+      ? value
+      : "explorer";
+  };
   const [page, setPage] = useState(route());
   useEffect(() => {
     const handler = () => setPage(route());
     addEventListener("hashchange", handler);
     return () => removeEventListener("hashchange", handler);
   }, []);
+  if (page.startsWith("report/"))
+    return <ReportDocument key={page} route={page} />;
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -623,7 +641,10 @@ function App() {
         </div>
         <p className="nav-label">WORKSPACE</p>
         <nav aria-label="Main navigation">
-          <a href="#admission" className={page === "admission" ? "active" : ""}>
+          <a
+            href="#admission"
+            className={page.startsWith("admission") ? "active" : ""}
+          >
             <span>✓</span>Admission
           </a>
           <a
@@ -653,6 +674,27 @@ function App() {
           <a className={page.startsWith("runs") ? "active" : ""} href="#runs">
             <span>▷</span>Runs and Evidence
           </a>
+          <a href="#gates" className={page.startsWith("gates") ? "active" : ""}>
+            <span>◇</span>Gates
+          </a>
+          <a
+            href="#reports"
+            className={page.startsWith("reports") ? "active" : ""}
+          >
+            <span>▤</span>Reports
+          </a>
+          <a
+            href="#dashboard"
+            className={page.startsWith("dashboard") ? "active" : ""}
+          >
+            <span>⌁</span>Dashboard
+          </a>
+          <a
+            href="#releases"
+            className={page.startsWith("releases") ? "active" : ""}
+          >
+            <span>✓</span>Release Decisions
+          </a>
           <a
             className={page === "connections" ? "active" : ""}
             href="#connections"
@@ -661,7 +703,7 @@ function App() {
           </a>
         </nav>
         <div className="sidebar-note">
-          <span className="mini-label">STAGE 1 · UI-5</span>
+          <span className="mini-label">STAGE 1 · UI-6</span>
           <p>
             Definitions first.
             <br />
@@ -691,15 +733,15 @@ function App() {
                 judges: "Judge Configuration",
                 runs: "Runs and Evidence",
                 admission: "Admission",
+                gates: "Gates",
+                reports: "Reports",
+                dashboard: "Dashboard",
+                releases: "Release Decisions",
+                result: "Result Evidence",
+                metric: "Metric Evidence",
                 controls: "Seeded Controls",
                 "control-designer": "Control Scenario Designer",
-              }[
-                page.startsWith("runs")
-                  ? "runs"
-                  : page.startsWith("controls")
-                    ? "controls"
-                    : page
-              ]
+              }[page.split("/")[0]]
             }
           </span>
           <div>
@@ -738,10 +780,22 @@ function App() {
             <Explorer />
           ) : page.startsWith("runs") ? (
             <RunsScreen route={page} />
-          ) : page === "admission" ? (
-            <AdmissionScreen />
+          ) : page.startsWith("admission") ? (
+            <AdmissionScreen key={page} route={page} />
           ) : page.startsWith("controls") ? (
             <ControlsScreen route={page} />
+          ) : page.startsWith("gates") ? (
+            <GatesScreen key={page} route={page} />
+          ) : page.startsWith("reports") ? (
+            <ReportsScreen key={page} route={page} />
+          ) : page.startsWith("dashboard") ? (
+            <Dashboard key={page} route={page} />
+          ) : page.startsWith("releases") ? (
+            <ReleasesScreen key={page} route={page} />
+          ) : page.startsWith("result/") ? (
+            <ResultLocator key={page} route={page} />
+          ) : page.startsWith("metric/") ? (
+            <MetricEvidence key={page} route={page} />
           ) : null}
         </main>
       </div>

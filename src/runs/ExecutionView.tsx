@@ -188,9 +188,11 @@ function ReviewForm({
 export function ExecutionView({
   project,
   id,
+  focusResult,
 }: {
   project: string;
   id: string;
+  focusResult?: string;
 }) {
   const [execution, setExecution] = useState<Execution>(),
     [results, setResults] = useState<Result[]>([]),
@@ -276,6 +278,15 @@ export function ExecutionView({
     results.map((r) => r.resolves).filter(Boolean),
   );
   const can = (permission: string) => person?.permissions.includes(permission);
+  useEffect(() => {
+    if (busy || !focusResult) return;
+    const target = document
+      .getElementById("support-" + focusResult)
+      ?.closest(".chain-link") as HTMLElement | undefined;
+    target?.scrollIntoView();
+    target?.setAttribute("tabindex", "-1");
+    target?.focus({ preventScroll: true });
+  }, [busy, focusResult, results]);
   return (
     <>
       <a href="#runs">← Runs and Evidence</a>

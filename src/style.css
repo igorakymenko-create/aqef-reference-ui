@@ -1400,3 +1400,357 @@ summary {
   table-layout: fixed;
   width: 100%;
 }
+
+.decision-page,
+.dashboard-live,
+.evaluation-evidence {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.decision-page .page-heading {
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.decision-page .page-heading > div {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.decision-page .page-heading > a {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.gate-card,
+.evaluation-evidence,
+.release-record,
+.dashboard-results,
+.report-library li {
+  background: #fff;
+  border: 1px solid #d5dfce;
+  border-radius: 10px;
+  padding: 22px;
+  margin: 20px 0;
+  min-width: 0;
+}
+.gate-card {
+  border-left: 4px solid #9eab94;
+}
+.gate-card.gate-fail {
+  border-left-color: #c59c69;
+}
+.gate-card.gate-pass {
+  border-left-color: #81a580;
+}
+.gate-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.gate-card h2 {
+  margin: 0 0 8px;
+}
+.gate-card h3 {
+  margin: 18px 0 9px;
+  font-size: 14px;
+}
+.gate-card p {
+  margin: 8px 0;
+}
+.gate-labels {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.scope-label {
+  font-size: 12px;
+  padding: 6px 9px;
+  border: 1px solid #cbd8c1;
+  border-radius: 5px;
+}
+.basis-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  background: #f4f7ef;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+.basis-grid dt {
+  font: 11px var(--mono, monospace);
+  color: #52664f;
+}
+.basis-grid dd {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+.number-link {
+  border: 0;
+  border-bottom: 1px dotted currentColor;
+  border-radius: 0;
+  padding: 2px 0;
+  background: none;
+  font: inherit;
+  color: #214d41;
+  cursor: pointer;
+}
+.text-link {
+  background: none;
+  border: 0;
+  padding: 8px;
+  text-decoration: underline;
+  font: inherit;
+}
+.gate-reasons li {
+  margin: 10px 0;
+  padding-left: 3px;
+}
+.gate-reasons code {
+  font-weight: 600;
+}
+.gate-reasons p {
+  color: #526250;
+}
+.badge.not_computed {
+  background: #f5ecd9;
+  color: #79603b;
+  border: 1px solid #dfcda7;
+}
+.badge.overridden {
+  background: #eee5f4;
+  color: #624d73;
+  border: 1px solid #d4c3e0;
+}
+.override-record {
+  margin: 16px 0;
+  border-left: 3px solid #aa8bb9;
+  padding: 14px;
+  background: #faf5fc;
+}
+.evaluation-heading {
+  padding: 15px 0;
+}
+.evaluation-history {
+  padding-left: 20px;
+}
+.evaluation-history button {
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.evaluation-history li {
+  margin: 15px 0;
+}
+.override-form {
+  scroll-margin-top: 20px;
+  border: 2px solid #b9a5c6;
+}
+.evaluation-evidence {
+  scroll-margin-top: 20px;
+}
+.chain-link:focus {
+  outline: 2px solid #809e75;
+  outline-offset: 3px;
+}
+.live-banner {
+  padding: 20px 22px;
+  background: #173f35;
+  color: #edf4e5;
+  border-radius: 8px;
+  margin: 0 0 24px;
+}
+.live-banner p {
+  margin: 9px 0 0;
+  font-size: 12px;
+  color: #d3e3cb;
+}
+.dashboard-live {
+  background: #f0f5e9;
+  padding: 20px;
+  border-radius: 12px;
+}
+.dashboard-results h3 {
+  margin: 0 0 8px;
+}
+.dashboard-live [aria-label="Open work"] li {
+  padding: 10px 0;
+}
+.gate-trends {
+  border-top: 1px solid #bfd0b7;
+  margin-top: 24px;
+  padding-top: 20px;
+}
+.trend {
+  margin: 20px 0;
+  background: #fff;
+  border: 1px solid #cfdbc6;
+  padding: 18px;
+  border-radius: 8px;
+}
+.trend figcaption {
+  font-size: 14px;
+  font-weight: 650;
+}
+.trend svg {
+  display: block;
+  width: 100%;
+  max-height: 150px;
+  margin: 10px 0;
+  color: #315e4a;
+  background: repeating-linear-gradient(
+    to top,
+    #f0f5ed 0 1px,
+    transparent 1px 25px
+  );
+}
+.trend li {
+  font-size: 11px;
+  padding: 5px 0;
+}
+.report-library {
+  padding: 0;
+  list-style: none;
+}
+.report-shell {
+  min-height: 100vh;
+  background: #e8e5dc;
+  padding-bottom: 50px;
+  color: #30382d;
+}
+.frozen-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: #f2dfb7;
+  border-bottom: 2px solid #ad8b50;
+  color: #58431d;
+  padding: 18px 28px;
+  box-shadow: 0 2px 8px #4d422218;
+}
+.frozen-banner strong {
+  font: 600 13px/1.6 var(--mono, monospace);
+}
+.frozen-banner nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 12px;
+}
+.frozen-banner nav a {
+  color: #514322;
+  text-decoration: underline;
+}
+.report-document {
+  max-width: 1050px;
+  background: #fffef9;
+  margin: 35px auto;
+  padding: 45px 55px;
+  box-shadow: 0 6px 30px #2a332214;
+  border: 1px solid #d5d2c5;
+  overflow-wrap: anywhere;
+}
+.report-document h1 {
+  font-family: Georgia, serif;
+  font-size: 48px;
+  letter-spacing: -1px;
+  margin: 15px 0;
+}
+.report-document h2 {
+  margin-top: 28px;
+}
+.document-kicker {
+  letter-spacing: 2px;
+  font-size: 11px;
+  color: #74694e;
+}
+.report-id {
+  font-family: monospace;
+  font-size: 12px;
+}
+.immutable-note {
+  padding: 14px 18px;
+  border: 1px solid #dccba6;
+  background: #f9f3e6;
+  margin: 24px 0;
+}
+.report-document [aria-label="Report scope"] {
+  padding: 15px 0 25px;
+  border-bottom: 2px solid #d9d4c3;
+}
+.report-document dt {
+  font-size: 12px;
+  font-weight: 650;
+  margin-top: 10px;
+}
+.report-document dd {
+  margin: 6px 0;
+}
+.report-document .gate-card {
+  border-radius: 2px;
+  box-shadow: none;
+  background: #fffefb;
+}
+.report-metric,
+.report-signal {
+  border-top: 1px solid #d8d7cb;
+  padding: 20px 0;
+}
+.report-signal li {
+  margin: 10px 0;
+}
+.risk-label {
+  color: #825f30;
+  font-size: 12px;
+  border-left: 3px solid #bfa068;
+  padding-left: 10px;
+}
+.empty-record {
+  color: #697365;
+  font-style: italic;
+}
+@media (max-width: 800px) {
+  .basis-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .gate-card,
+  .evaluation-evidence,
+  .release-record {
+    padding: 16px;
+  }
+  .dashboard-live {
+    padding: 12px;
+  }
+  .report-document {
+    margin: 16px 10px;
+    padding: 24px 18px;
+  }
+  .report-document h1 {
+    font-size: 38px;
+  }
+  .frozen-banner {
+    padding: 14px 18px;
+  }
+}
+@media print {
+  .report-shell {
+    background: white;
+  }
+  .frozen-banner {
+    position: static;
+    box-shadow: none;
+  }
+  .report-document {
+    margin: 0;
+    padding: 20px;
+    box-shadow: none;
+    border: 0;
+  }
+}

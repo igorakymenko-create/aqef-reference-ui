@@ -21,10 +21,17 @@ import { agreement, excluded, propose } from "./model";
 import { canonical } from "../workspace/model";
 import { figure } from "../format";
 
-export function AdmissionScreen() {
+export function AdmissionScreen({ route = "admission" }: { route?: string }) {
+  const routeParts = route.split("/").map((value) => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  });
   const [projects, setProjects] = useState<RecordData[]>([]),
-    [project, setProject] = useState(""),
-    [oracle, setOracle] = useState(""),
+    [project, setProject] = useState(routeParts[1] ?? ""),
+    [oracle, setOracle] = useState(routeParts[2] ?? ""),
     [refs, setRefs] = useState<RecordData[]>([]),
     [refKey, setRefKey] = useState(""),
     [plans, setPlans] = useState<RecordData[]>([]),
@@ -72,7 +79,9 @@ export function AdmissionScreen() {
       .then((rows) => {
         setProjects(rows);
         setProject(
-          rows.find((p) => !p.name.startsWith("admission-"))?.name ?? "",
+          rows.find((p) => p.name === routeParts[1])?.name ??
+            rows.find((p) => !p.name.startsWith("admission-"))?.name ??
+            "",
         );
       })
       .catch(setError);
@@ -566,7 +575,7 @@ export function AdmissionScreen() {
             </p>
             <p>
               Declared by {plan.declared_by} at {plan.declared_at};{" "}
-              {plan.measure}, threshold {plan.declared_threshold}.
+              {plan.measure}, threshold {figure(plan.declared_threshold)}.
             </p>
             <details>
               <summary>Declaration and exact configuration</summary>
@@ -674,7 +683,7 @@ export function AdmissionScreen() {
                 {figures.kappa === "not_computed"
                   ? "not_computed"
                   : figure(figures.kappa)}{" "}
-                ≥ {threshold}:{" "}
+                ≥ {figure(Number(threshold))}:{" "}
                 {String(
                   figures.kappa !== "not_computed" &&
                     figures.kappa >= Number(threshold),
