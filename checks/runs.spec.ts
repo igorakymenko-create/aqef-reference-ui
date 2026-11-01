@@ -50,6 +50,92 @@ async function run(page: Page, suite = "support-behaviours") {
 const scenario = (batch: Batch, name: string) =>
   batch.executions.find((e) => e.scenario === name)!;
 test.describe.serial("UI-4 independent Runs and Evidence checks", () => {
+  test("a delayed initial simulator read cannot replace the written state; unknown disables both buttons", async ({
+    page,
+  }) => {
+    await page.request.post("/sim-control/flaky", {
+      data: { unavailable: true },
+    });
+    const release: (() => void)[] = [];
+    let held = 0,
+      ready!: () => void,
+      staleFinished!: () => void;
+    const bothHeld = new Promise<void>((resolve) => {
+      ready = resolve;
+    });
+    const staleDone = new Promise<void>((resolve) => {
+      staleFinished = resolve;
+    });
+    await page.route("**/sim-control/flaky", async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const index = held++;
+      const response = await route.fetch();
+      const gate = new Promise<void>((resolve) => {
+        release[index] = resolve;
+      });
+      if (release[0] && release[1]) ready();
+      await gate;
+      await route.fulfill({ response });
+      if (index === 0) staleFinished();
+    });
+    try {
+      await page.goto("/#connections");
+      // The development app's StrictMode starts two initial effect reads.
+      // Hold both, then deliver one so the real button write can proceed.
+      await bothHeld;
+      const panel = page.getByRole("region", { name: "Simulator control" });
+      await expect(panel).toContainText("Flaky outage: unknown");
+      await expect(
+        panel.getByRole("button", {
+          name: "Turn flaky outage off",
+          exact: true,
+        }),
+      ).toBeDisabled();
+      await expect(
+        panel.getByRole("button", {
+          name: "Turn flaky outage on",
+          exact: true,
+        }),
+      ).toBeDisabled();
+      release[1]();
+      await expect(panel).toContainText("Flaky outage: on");
+      const written = page.waitForResponse(
+        (r) =>
+          r.url().endsWith("/sim-control/flaky") &&
+          r.request().method() === "POST",
+      );
+      await panel
+        .getByRole("button", { name: "Turn flaky outage off", exact: true })
+        .click();
+      expect((await (await written).json()).unavailable).toBe(false);
+      await expect(panel).toContainText("Flaky outage: off");
+      const staleResponse = page.waitForResponse(
+        (r) =>
+          r.url().endsWith("/sim-control/flaky") &&
+          r.request().method() === "GET",
+      );
+      release[0]();
+      await (await staleResponse).finished();
+      await staleDone;
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+          ),
+      );
+      await expect(panel).toContainText("Flaky outage: off");
+      expect(
+        (await (await page.request.get("/sim-control/flaky")).json())
+          .unavailable,
+      ).toBe(false);
+    } finally {
+      release.forEach((resolve) => resolve());
+      await page.unrouteAll({ behavior: "wait" });
+      await page.request.post("/sim-control/flaky", {
+        data: { unavailable: true },
+      });
+    }
+  });
   test("all returned Executions remain visible, infrastructure failure has no completed transcript, Confidence capture is explicit", async ({
     page,
   }) => {
@@ -274,11 +360,12 @@ test.describe.serial("UI-4 independent Runs and Evidence checks", () => {
     ) as any;
     guarded.name = "guarded-slow-outage";
     guarded.variables.sim_case = "slow";
-    guarded.contract.constraints = [
-      definition.contracts[0].constraints.find(
-        (c: any) => c.id === "response-latency",
-      ),
-    ];
+    const latencyGuard = definition.suites
+      .find((s: any) => s.name === "support-behaviours")
+      .scenarios.find((s: any) => s.name === "slow-response")
+      .contract.constraints.find((c: any) => c.id === "response-latency");
+    expect(latencyGuard.expected).toBe(200);
+    guarded.contract.constraints = [latencyGuard];
     recoveryProject.suites[0].scenarios.push(guarded);
     expect(
       (
@@ -301,7 +388,9 @@ test.describe.serial("UI-4 independent Runs and Evidence checks", () => {
     expect(
       guardedResults.find((r: any) => r.clause === "response-latency").verdict,
     ).toBe("fail");
-    expect(guardedResults.filter((r: any) => r.oracle_type === "judge")).toHaveLength(0);
+    expect(
+      guardedResults.filter((r: any) => r.oracle_type === "judge"),
+    ).toHaveLength(0);
     try {
       await show(page, execution.id, project);
       const original = (await resultRows(page, execution.id, project)).find(
@@ -328,6 +417,9 @@ test.describe.serial("UI-4 independent Runs and Evidence checks", () => {
       const unavailable = rows.find((r: any) => r.resolves === original.id);
       expect(unavailable.disposition).toBe("oracle_unavailable");
       await page.goto("/#connections");
+      await expect(
+        page.getByRole("region", { name: "Simulator control" }),
+      ).toContainText("Flaky outage: on");
       await page
         .getByRole("button", { name: "Turn flaky outage off", exact: true })
         .click();
@@ -376,7 +468,8 @@ test.describe.serial("UI-4 independent Runs and Evidence checks", () => {
     page,
   }) => {
     const execution = scenario(second, "human-signoff");
-    const original = (await resultRows(page, execution.id)).find(
+    const before = await resultRows(page, execution.id);
+    const original = before.find(
       (r: any) => r.oracle_type === "human_reviewer",
     );
     expect(original.disposition).toBe("awaiting_review");
@@ -432,7 +525,7 @@ test.describe.serial("UI-4 independent Runs and Evidence checks", () => {
     await expect(page.getByRole("status")).toContainText("completed in place");
     const after = await resultRows(page, execution.id),
       completed = after.find((r: any) => r.id === original.id);
-    expect(after).toHaveLength(3);
+    expect(after.map((r: any) => r.id)).toEqual(before.map((r: any) => r.id));
     expect(completed.recorded_at).toBe(original.recorded_at);
     expect(completed.verdict).toBe("pass");
     expect(completed).not.toHaveProperty("resolves");

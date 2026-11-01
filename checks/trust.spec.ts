@@ -615,6 +615,34 @@ test.describe.serial("UI-5 independent Admission and control checks", () => {
           .getByText(/invalidated — cannot support a release decision/)
           .first(),
       ).toBeVisible();
+      // Measure a cold deep link separately from the Controls page's already
+      // in-flight confirmation reload. The original navigation above still has
+      // its default five-second assertion.
+      const evidence = await page.context().newPage();
+      try {
+        const reads: string[] = [];
+        evidence.on("request", (request) => {
+          reads.push(new URL(request.url()).pathname);
+        });
+        await evidence.goto("/#runs/" + projectName + "/" + e.id);
+        await expect(
+          evidence
+            .getByText(/invalidated — cannot support a release decision/)
+            .first(),
+        ).toBeVisible();
+        expect(reads.filter((path) => path.endsWith("/executions"))).toEqual(
+          [],
+        );
+        const resultReads = reads.filter((path) => path.endsWith("/results"));
+        expect(resultReads.length).toBeGreaterThan(0);
+        expect(
+          resultReads.every(
+            (path) => path === `${base}/executions/${e.id}/results`,
+          ),
+        ).toBe(true);
+      } finally {
+        await evidence.close();
+      }
       expect(
         (await results(page, e.id)).find((r: any) => r.id === row.id).verdict,
       ).toBe(row.verdict);

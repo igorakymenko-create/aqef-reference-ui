@@ -1,5 +1,109 @@
 # Implementation notes
 
+## UI-6 review fixes — F-1 and F-2
+
+F-1 was a real SimulatorControl race: an initial GET could settle after the POST
+and overwrite its reported outage state. Initial reads now carry the write revision
+at which they started; responses and errors from an earlier revision are discarded.
+Effect cleanup also discards reads from an obsolete mount. Both buttons are disabled
+until the initial state is known. The existing three-link recovery check explicitly
+waits for that state before clicking. A new route-controlled check holds the two
+development StrictMode initial reads, verifies both unknown-state buttons disabled,
+releases one read, performs the real POST off, then delivers the stale initial on
+response. Both the screen and simulator remain off. No timer-based route sleep or
+expect-timeout increase is used.
+
+F-2 was unrelated full-history traffic from the RunsScreen parent. On a direct
+Execution route it still mounted the Runs index's effects: read Projects, choose
+the default Project, page through all its Executions and request every Execution's
+Results. These competed with the selected Execution's already-parallel evidence
+reads. RunsScreen now gates the history loader on the current list route, including
+after an in-flight collection read settles. It preserves the existing component's
+form/filter state when navigating between the list and an Execution. The first
+prototype unmounted the index and the complete suite caught a form-state regression;
+that prototype was discarded before the final verification runs. A detail page no
+longer fetches the Execution collection or unrelated Results. The existing Project
+metadata read remains; it took 98ms in the final measurement.
+The UI-5 invalidation check now asserts that no Execution collection or unrelated
+Results request starts when opening either invalidated Execution.
+
+Read-only measurements used the same stored invalidated Execution and database,
+first with the original built UI and then with only the UI rebuilt. Original:
+306 API reads, invalidation visible at 6,009ms; unrelated Results requests reached
+22,821ms. Final correction: seven API reads, invalidation visible at 2,974ms; the
+slowest required read was the selected Execution's Results at 2,666ms. Conversation,
+Artifacts, Roles and Requalifications were fetched in parallel. No engine endpoint,
+data, aggregate or timeout was changed. These are observed local measurements,
+not a performance guarantee on other machines.
+
+Remaining F-2 API limitation: the pin offers an Execution-scoped Results collection,
+but no individual-Result GET. The required scoped read itself took 2,666ms in this
+measurement; the UI cannot omit it or invent current invalidations from cached data.
+No endpoint was added and no longer expect timeout masks this remaining API cost.
+
+The first full one-CPU attempt exposed an additional fixture dependency: the
+captured-human subject took 344ms against the inherited 200ms latency Constraint.
+The engine correctly returned an actionable Validator failure and no Human Result;
+waiting longer could never create a Review button. With the owner's explicit
+approval to change test fixtures only, the disposable service launcher now copies
+the example into its temporary workspace and moves that unchanged latency
+Constraint from the check Project's inherited Contract onto its
+slow-response Scenario. The deliberately guarded recovery Scenario also keeps it.
+Human/Judge interaction fixtures therefore do not depend on the host meeting 200ms;
+the actual latency failure/short-circuit check remains. The checked-in Aster sample,
+simulator, engine and all timeout settings are unchanged. Setup updates only the
+temporary test workspace before either service starts, and the unchanged bootstrap
+imports that copy through the normal engine API. This applies from UI-1 onward:
+moving it only at UI-4 was too late for Explorer's Judge Evidence check under CPU
+stress. Human completion checks compare the original and final Result IDs rather
+than assuming an extra inherited latency Result.
+The earlier failed CPU attempt is not counted as successful verification.
+
+A later strict-CPU attempt hit an unrelated transport refusal during Workspace
+Export: Vite received ECONNREFUSED from the local fixture listener on port 9200 and
+showed HTTP 500, not a late successful result. The stdlib fixture servers' default
+five-slot TCP listen queue could overflow under a connection burst on one CPU.
+Only the disposable launcher configures their listen queue to 128. The simulator
+and YAML service implementations, endpoints, validation, deadlines and data semantics
+remain unchanged. No retry or timeout increase conceals the refusal.
+
+Verification uses Windows x64, Node 24.13.0, Python 3.12.1 and the pinned Playwright
+1.56.1 Chromium. Each complete run invokes `npx playwright test --reporter=line`
+with the checked-in configuration, fresh disposable services/database, and no timeout
+or retry override. The Windows equivalent of `taskset -c 0` used here is a Job Object
+with JOB_OBJECT_LIMIT_AFFINITY and mask 1, assigned to the verifier before launching
+the CPU series. Process affinity inheritance alone was insufficient: Chromium
+expanded one sandbox child's mask back to the system mask. The Job Object prevents
+that expansion for the complete subprocess tree. The launcher samples live current-
+run descendants using Toolhelp/GetProcessAffinityMask, including Node/Vite, the
+Python engine/simulator/workspace services and Chromium `headless_shell.exe`.
+Each sample rebuilds the tree from the current npx shell. The constrained verifier
+exits after its CPU series; no
+machine-wide CPU setting is changed.
+
+Final verification on this source passed six consecutive complete invocations:
+three normal runs (182.23s, 181.19s, 181.22s), followed by three one-CPU runs
+(272.66s, 278.19s, 279.31s), each 46/46. The original five-second assertions remain
+unchanged. A separate preliminary complete CPU run also passed 46/46 (280.84s),
+but is not substituted for any run in that six-run sequence.
+
+The third CPU run's raw collector flagged five unrelated msedge.exe processes at
+the system mask, despite all Node, Python, esbuild and test Chromium processes
+having mask 1. Windows had recycled their long-gone parent PIDs into the test tree.
+Their live StartTime values were independently checked: all five started at
+20:16:33, before the CPU run began around 20:55. The audit correction excludes
+those pre-existing processes only; the original raw flag, process samples and test
+logs are retained locally. All test-process samples in all three CPU runs have mask
+1, and the Job Object enforced that constraint throughout. The Playwright exit
+code was 0 in each run, including the third CPU run.
+
+The final production build and all 12 Python integration checks also pass; the
+vendor hash check confirms that the pinned engine is unchanged. The Python checks
+still load the original committed Aster sample, not the isolated browser fixture.
+Compose was restored healthy after verification. The read-only preservation check
+matched all 528 Execution IDs, six frozen Reports and 30 workspace revisions from
+the existing delivery baseline; both active static assets remain credential-free.
+
 ## UI-6 — Gates, frozen Reports, live Dashboard and decisions
 
 `src/decisions/api.ts` reads production API collections and retains actual Gates

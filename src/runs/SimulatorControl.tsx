@@ -1,16 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { request } from "./api";
 import { Failure } from "./ExecutionView";
 export function SimulatorControl({ onChange }: { onChange: () => void }) {
   const [unavailable, setUnavailable] = useState<boolean>(),
     [busy, setBusy] = useState(false),
     [error, setError] = useState<unknown>();
+  const revision = useRef(0);
   useEffect(() => {
+    const started = revision.current;
+    let active = true;
     request("/sim-control/flaky")
-      .then((data) => setUnavailable(data.unavailable))
-      .catch(setError);
+      .then((data) => {
+        if (active && started === revision.current)
+          setUnavailable(data.unavailable);
+      })
+      .catch((err) => {
+        if (active && started === revision.current) setError(err);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
   async function change(value: boolean) {
+    ++revision.current;
     setBusy(true);
     setError(undefined);
     try {
@@ -41,13 +53,13 @@ export function SimulatorControl({ onChange }: { onChange: () => void }) {
       </p>
       <div className="button-row">
         <button
-          disabled={busy || unavailable === false}
+          disabled={busy || unavailable === undefined || unavailable === false}
           onClick={() => void change(false)}
         >
           Turn flaky outage off
         </button>
         <button
-          disabled={busy || unavailable === true}
+          disabled={busy || unavailable === undefined || unavailable === true}
           onClick={() => void change(true)}
         >
           Turn flaky outage on
