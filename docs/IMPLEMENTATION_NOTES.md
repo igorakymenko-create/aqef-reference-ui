@@ -1,5 +1,119 @@
 # Implementation notes
 
+## UI-6 — Gates, frozen Reports, live Dashboard and decisions
+
+`src/decisions/api.ts` reads production API collections and retains actual Gates
+check responses in session memory. It joins engine-owned Report Gate copies to
+Snapshot metadata, without reading a database or calculating values, rates, Basis,
+reasons or status. G-8 is visible: other sessions' unreported evaluations cannot be
+listed; Report-backed timestamps are captured_at, never substituted evaluated_at.
+History is therefore latest-known, not globally complete. Exact GateResult IDs
+prevent override inheritance across evaluations. Read omissions remain explicit.
+
+Gates check sends only execution_batch_id and always evaluates the complete applicable
+map. Cards retain every reason and all Basis fields, ThresholdMap and metric_basis,
+with blocking/advisory wording. Numeric links open exactly the returned evaluation
+IDs, grouped by clause and linked to UI-4 chains; Metric links use their own IDs.
+G-9 prohibits invented per-Gate subsets and per-Result stale flags. A Report copy
+without IDs or an aggregate definition says so instead of splicing in current data.
+
+ReportDocument is a separate application root: it mounts no workspace, shared live
+reader or Dashboard poller. It fetches its own document only. The warm paper background,
+serif document title, scope block and sticky amber “Frozen Report — generated at”
+banner identify a frozen artifact even without the URL. Gates use their frozen
+override references only. All six signal lists remain visible, including empty none;
+exact signal objects and the complete document remain under disclosures. The line
+“Current state may differ; this Report does not change.” is unconditional, requiring
+no prohibited live read. Navigating to evidence leaves the document view.
+
+Dashboard uses the application navigation, green live header, card/grid layout,
+“Live view — updates as new Results arrive” and last successful refresh time. It
+never labels a timestamp generated_at. A five-second interval reads API data, with
+unmount cancellation and an in-flight guard; it does not check Gates or generate
+Reports. ResultCounts matches Explorer's labelled counts, not a verdict. Open work
+uses actual dispositions/invalidated_by and latest accepted Admission flags. The
+small Trend plots recorded Gate values only; null/not_computed breaks paths rather
+than becoming zero. Coordinate scaling is not an AQEF aggregate.
+
+Override POSTs identify exactly one failed blocking GateResult and require a reason;
+the response preserves fail with Approval metadata. Missing historical approval time/
+Role is labelled, never inferred from current membership. Frozen Reports never join
+live Approvals. Concurrent forms exercise an actual 201 then 409. Additional tests
+exercise real 403 and 404 bodies. Release forms have no default decision and send
+the documented five fields; the engine decides validity. A changed clause produces
+an actual stale 409 shown verbatim. Recorded decisions retain advisory failures.
+
+The added ten-Scenario decision Project leaves the original twenty intact and
+demonstrates all requested Gate cases without weakening inherited Contracts. The
+existing Role/Principal APIs provision/check gate_override, release_decide and review.
+No dependency, server, SQL reader, workspace journal or engine change was added.
+Baselines/regression, Release Policies and broader Trends remain deferred.
+
+The first final triple run passed twice, then its third pass hit a separate local
+transport failure during Admission's shared Apply preflight: Vite logged connect
+EADDRINUSE to 127.0.0.1:8000 and returned HTTP 500. This was not the A-1 recovery
+failure (that test passed). Vite's bundled http-proxy sets agent=false and forces
+Connection: close unless an Agent is supplied. The development API proxy now uses
+a bounded Node HTTP keep-alive pool (16 active/8 idle sockets), avoiding connection
+churn across repeated suites. No retry, assertion timeout or engine change was used.
+The initial failed attempt is not counted as three successful consecutive runs.
+
+After that transport correction, three complete consecutive disposable runs passed:
+12/12 Python integration checks and 45/45 browser checks in each run (browser
+durations 3.4m, 3.3m, 3.2m). No retries were configured. The production TypeScript/Vite
+build passed; the vendor hash verification in each Python run confirms the pinned
+engine remains byte-for-byte unchanged.
+
+The owner-only Docker sample-adoption check is outside the disposable 45-check
+suite. Its multi-Apply/run workflow initially exceeded the default 30-second total
+against retained history. It now uses the same 120-second workflow/30-second locator
+budget as the existing Docker regression configuration. It also waits for Apply's
+post-save reload to finish before selecting another file: the completion heading
+precedes that reload, so selecting early could be overwritten by the active-file
+reload. This deployment synchronization is separate from A-1; the recovery check's
+timeouts and retry policy remain unchanged.
+
+The rebuilt Compose deployment passed sample adoption (1, 50.5s), existing nginx/
+Runs regressions (6, 2.5m), trust workflows (9, 1.6m), and decision workflows
+(8, 52.8s): 24 checks in total. The owner Project has a retained decision batch
+and frozen Report for inspection. A coordinated Compose restart retained all
+528 Execution IDs, six frozen Reports (full-record hashes) and 30 workspace file
+revisions exactly. Both active static assets were scanned against the bootstrap
+and derived Person credentials; neither value is present. The prior preservation
+baseline's 298 Execution IDs were also retained. No volume or workspace was reset.
+
+## UI-6 — UI-5 corrections
+
+The UI-4 outage check borrowed the second shared product batch. That Project's
+200ms latency Validator ran before the flaky Judge; host scheduling could fail the
+Validator and short-circuit assessment, leaving no Judge Result for the test to
+re-check. The check now owns a fresh recovery Project with no inherited latency
+guard on its recovery Scenario, explicitly sets the simulator outage before running,
+and restores it in finally. A second, deliberately slow Scenario reproduces the old
+path: the original 200ms Validator fails and the engine returns no Judge Result.
+The recovery Scenario still proves exactly three engine links with one unchanged
+Oracle and no further subject calls. No retry or timeout increase is used for this fix.
+
+Invalid control labels now use an outcome's recorded reason if supplied, otherwise
+`invalid — no reason recorded by the engine`. The pin does not include a reason in
+its per-Oracle outcome records; its control-level reason is specifically for full-run
+invalidation and is not repurposed as an invalid-outcome diagnosis. Confirmed controls
+are never described as unconfirmed by inference. Full-run invalidation forms are
+collapsed until explicitly expanded.
+
+Reference Set version 3 has 26 illustrative labelled items. Two additions deliberately
+expose content-rule limits: an unsupported loyalty bonus that the amount/duration
+grammar misses, and the faithful `$49.00` versus `$49` formatting it overcalls. For
+the reliable configuration one exposed item is excluded: the 25-item table is
+[[11,1],[1,12]], raw agreement 0.92, chance agreement 0.5008 and κ about 0.840.
+The blind configuration includes all 26 items: [[13,0],[13,0]], κ 0.000. At a
+predeclared 0.800 threshold the workflow records admitted true and false respectively.
+Labels and case names never enter Judge Evidence. Displayed agreement and Confidence
+use three decimals; exact arithmetic and engine request/response values are retained.
+Before implementing the reporting slice, all 37 UI-1–UI-5 checks passed three complete
+sequential runs on fresh disposable services (2.8m, 2.7m, 2.7m). The recovery check's
+guarded short-circuit reproduction and three-link recovery both passed in every run.
+
 ## UI-5 — Admission, Seeded Controls and readable Evidence
 
 Completed the UI-4 presentation corrections first: Conversation/Artifacts/Results

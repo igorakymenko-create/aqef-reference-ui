@@ -1,4 +1,5 @@
 import type { Execution, Result } from "./api";
+import { figure } from "./format";
 
 export function clauseLabel(reference: string) {
   const unnamed = reference.match(
@@ -63,7 +64,7 @@ export function ResultEntries({
                     ? result.oracle_type === "validator"
                       ? "not applicable (Validator)"
                       : "not recorded by engine"
-                    : String(result.confidence)}
+                    : figure(result.confidence)}
               </span>
               {result.resolves && (
                 <span className="resolution">

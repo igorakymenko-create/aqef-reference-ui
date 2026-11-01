@@ -19,11 +19,19 @@ import {
 import { SelectField, InputField } from "../workspace/OracleFields";
 import { agreement, excluded, propose } from "./model";
 import { canonical } from "../workspace/model";
+import { figure } from "../format";
 
-export function AdmissionScreen() {
+export function AdmissionScreen({ route = "admission" }: { route?: string }) {
+  const routeParts = route.split("/").map((value) => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  });
   const [projects, setProjects] = useState<RecordData[]>([]),
-    [project, setProject] = useState(""),
-    [oracle, setOracle] = useState(""),
+    [project, setProject] = useState(routeParts[1] ?? ""),
+    [oracle, setOracle] = useState(routeParts[2] ?? ""),
     [refs, setRefs] = useState<RecordData[]>([]),
     [refKey, setRefKey] = useState(""),
     [plans, setPlans] = useState<RecordData[]>([]),
@@ -71,7 +79,9 @@ export function AdmissionScreen() {
       .then((rows) => {
         setProjects(rows);
         setProject(
-          rows.find((p) => !p.name.startsWith("admission-"))?.name ?? "",
+          rows.find((p) => p.name === routeParts[1])?.name ??
+            rows.find((p) => !p.name.startsWith("admission-"))?.name ??
+            "",
         );
       })
       .catch(setError);
@@ -565,7 +575,7 @@ export function AdmissionScreen() {
             </p>
             <p>
               Declared by {plan.declared_by} at {plan.declared_at};{" "}
-              {plan.measure}, threshold {plan.declared_threshold}.
+              {plan.measure}, threshold {figure(plan.declared_threshold)}.
             </p>
             <details>
               <summary>Declaration and exact configuration</summary>
@@ -649,18 +659,18 @@ export function AdmissionScreen() {
               <p>
                 Raw agreement Pₒ = (pass/pass + fail/fail) / N = (
                 {figures.table[0][0]} + {figures.table[1][1]}) / {figures.n} ={" "}
-                {String(figures.raw ?? "not_computed")}.
+                {figure(figures.raw ?? "not_computed")}.
               </p>
               <p>
                 Expected chance Pₑ = (human pass × Judge pass + human fail ×
                 Judge fail) / N² = ({figures.hp} × {figures.jp} + {figures.hf} ×{" "}
                 {figures.jf}) / {figures.n}² ={" "}
-                {String(figures.expected ?? "not_computed")}.
+                {figure(figures.expected ?? "not_computed")}.
               </p>
               <p>
-                Cohen’s κ = (Pₒ − Pₑ) / (1 − Pₑ) = ({String(figures.raw)} −{" "}
-                {String(figures.expected)}) / (1 − {String(figures.expected)}) ={" "}
-                <strong data-testid="kappa">{figures.kappa}</strong>.
+                Cohen’s κ = (Pₒ − Pₑ) / (1 − Pₑ) = ({figure(figures.raw)} −{" "}
+                {figure(figures.expected)}) / (1 − {figure(figures.expected)}) ={" "}
+                <strong data-testid="kappa">{figure(figures.kappa)}</strong>.
               </p>
               {figures.kappa === "not_computed" && (
                 <p>
@@ -672,14 +682,18 @@ export function AdmissionScreen() {
                 Proposed admitted = value ≥ declared threshold ={" "}
                 {figures.kappa === "not_computed"
                   ? "not_computed"
-                  : figures.kappa}{" "}
-                ≥ {threshold}:{" "}
+                  : figure(figures.kappa)}{" "}
+                ≥ {figure(Number(threshold))}:{" "}
                 {String(
                   figures.kappa !== "not_computed" &&
                     figures.kappa >= Number(threshold),
                 )}
                 . The engine accepts or refuses the record.
               </p>
+              <details>
+                <summary>Exact agreement arithmetic (unrounded)</summary>
+                <Raw value={figures} />
+              </details>
               <details>
                 <summary>Every scored item and Result id</summary>
                 <Raw value={plan.scores} />

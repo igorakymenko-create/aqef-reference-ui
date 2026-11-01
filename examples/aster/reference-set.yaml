@@ -1,9 +1,9 @@
 name: aster-grounding
-version: '2'
+version: '3'
 labelled_by:
 - aster-local-person
-provenance: Illustrative simulation labels for local Person review; not an independent
-  human labelling study. No external test material.
+provenance: Illustrative simulation labels for local Person review; not an independent human labelling
+  study. No external test material.
 items:
 - id: grounding-01
   evidence:
@@ -22,8 +22,8 @@ items:
   - aster-local-person
   exposed: true
   exposed_for:
-  - '{"confidence_source":"self_rating","criteria":"[grounding] Every amount and duration
-    must be supported by retrieved policy.","model":"aster-sim-judge-reliable@1","type":"judge","version":"http-judge-v1"}'
+  - '{"confidence_source":"self_rating","criteria":"[grounding] Every amount and duration must be
+    supported by retrieved policy.","model":"aster-sim-judge-reliable@1","type":"judge","version":"http-judge-v1"}'
 - id: grounding-02
   evidence:
     conversation:
@@ -309,3 +309,99 @@ items:
   label: fail
   labelled_by:
   - aster-local-person
+- id: grounding-21
+  evidence:
+    conversation:
+      turns:
+      - prompt: What refund does this policy support?
+        response: We return $60 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $60.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+  labelling_note: Faithful paraphrase.
+- id: grounding-22
+  evidence:
+    conversation:
+      turns:
+      - prompt: What refund does this policy support?
+        response: We return $160 within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $61.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+  labelling_note: Unsupported amount.
+- id: grounding-23
+  evidence:
+    conversation:
+      turns:
+      - prompt: What refund does this policy support?
+        response: The paid $62 is returned within 30 days.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $62.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+  labelling_note: Faithful paraphrase.
+- id: grounding-24
+  evidence:
+    conversation:
+      turns:
+      - prompt: What refund does this policy support?
+        response: The refund is $163.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $63.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+  labelling_note: Unsupported amount.
+- id: grounding-25
+  evidence:
+    conversation:
+      turns:
+      - prompt: What refund does this policy support?
+        response: The refund is $49, plus an automatic loyalty bonus.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $49.
+      latency_ms: 1
+  label: fail
+  labelled_by:
+  - aster-local-person
+  labelling_note: Bonus is unsupported. The narrow currency/duration rule misses this semantic addition.
+- id: grounding-26
+  evidence:
+    conversation:
+      turns:
+      - prompt: What refund does this policy support?
+        response: The refund is $49.00.
+    artifacts:
+      retrieved_context:
+      - source: reference-policy
+        type: refund_policy
+        text: Refunds within 30 days return $49.
+      latency_ms: 1
+  label: pass
+  labelled_by:
+  - aster-local-person
+  labelling_note: Equivalent monetary formatting. The narrow rule compares currency strings literally.

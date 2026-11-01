@@ -27,8 +27,8 @@ def bootstrap_person(base, token):
             if exc.code != 409: raise RuntimeError(f'Local Person bootstrap rejected: HTTP {exc.code}') from None
     roles = call('/roles?limit=1000')
     admin = next((r for r in roles if r['name'] == 'admin'), None)
-    if not admin or not {'read', 'execute', 'review'}.issubset(admin['permissions']):
-        raise RuntimeError('Local admin Role lacks sample read/execute/review permissions; no Role weakened or overwritten.')
+    if not admin or not {'read', 'execute', 'review', 'gate_override', 'release_decide'}.issubset(admin['permissions']):
+        raise RuntimeError('Local admin Role lacks sample read/execute/review/gate_override/release_decide permissions; no Role weakened or overwritten.')
     role = next((r for r in roles if r['name'] == 'aster-reviewer'), None)
     if role is None: call('/roles', {'name': 'aster-reviewer', 'permissions': ['read', 'review']})
     elif not {'read', 'review'}.issubset(role['permissions']): raise RuntimeError('Existing aster-reviewer Role lacks required permissions')
@@ -38,10 +38,9 @@ def bootstrap_person(base, token):
     urllib.request.urlopen(req, timeout=5).close()
 
 
-def seed(base, token, workspace):
-    bootstrap_person(base, token)
+def seed_project(base, token, source):
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    data = yaml.safe_load((Path(workspace) / "project.yaml").read_text(encoding="utf-8"))["project"]
+    data = yaml.safe_load(Path(source).read_text(encoding="utf-8"))["project"]
     from urllib.parse import quote
     request = urllib.request.Request(f'{base}/projects/{quote(data["name"], safe="")}', headers=headers)
     try:
@@ -58,6 +57,13 @@ def seed(base, token, workspace):
         # Engine error body is safe here: sample inputs contain no credentials.
         raise RuntimeError(f"Sample import rejected: HTTP {exc.code}: {exc.read().decode()}") from None
     print("Aster YAML loaded through the engine REST API (Person admin; governed Audit recorded).", flush=True)
+
+
+def seed(base, token, workspace):
+    bootstrap_person(base, token)
+    for name in ("project.yaml", "decision-project.yaml"):
+        source=Path(workspace)/name
+        if source.exists():seed_project(base, token, source)
 
 
 def main():

@@ -11,6 +11,7 @@ const env = {
 export default defineConfig({
   testDir: "./checks",
   projects: [
+    { name: "ui-6", testMatch: "decisions.spec.ts", dependencies: ["ui-5"] },
     { name: "ui-5", testMatch: "trust.spec.ts", dependencies: ["ui-4"] },
     { name: "ui-4", testMatch: "runs.spec.ts", dependencies: ["ui-3"] },
     { name: "ui-3", testMatch: "oracles.spec.ts", dependencies: ["ui-2"] },

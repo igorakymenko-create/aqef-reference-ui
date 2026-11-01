@@ -11,6 +11,14 @@ import {
 import { Failure, Raw } from "../runs/ExecutionView";
 import { SelectField, InputField } from "../workspace/OracleFields";
 import { controlData } from "./data";
+export function invalidLabel(record: RecordData) {
+  // This pin's control.reason describes full-run invalidation, not an invalid score.
+  const reason =
+    record.invalidation_scope === "full_run" ? undefined : record.reason;
+  return typeof reason === "string" && reason.trim()
+    ? `invalid — ${reason}`
+    : "invalid — no reason recorded by the engine";
+}
 export function ControlsScreen({ route }: { route: string }) {
   const parts = route.split("/"),
     [project, setProject] = useState(
@@ -140,9 +148,7 @@ export function ControlsScreen({ route }: { route: string }) {
             {c.outcome}
           </p>
           {c.outcome === "invalid" && (
-            <p className="notice">
-              Evidence not confirmed — no verdict about the Oracle
-            </p>
+            <p className="notice">{invalidLabel(c)}</p>
           )}
           <p>
             Confirmed by {c.confirmed_by}; confirmed: {String(c.confirmed)};
@@ -182,11 +188,7 @@ export function ControlsScreen({ route }: { route: string }) {
                   </td>
                   <td>
                     {o.outcome}
-                    {o.outcome === "invalid" && (
-                      <p>
-                        Evidence not confirmed — no verdict about the Oracle
-                      </p>
-                    )}
+                    {o.outcome === "invalid" && <p>{invalidLabel(o)}</p>}
                   </td>
                   <td>
                     {o.result_ids.map((key: string) => {
@@ -248,16 +250,19 @@ export function ControlsScreen({ route }: { route: string }) {
           {person?.permissions.includes("seeded_control_invalidate") &&
             ["missed", "false_alarm"].includes(c.outcome) &&
             c.invalidation_scope !== "full_run" && (
-              <ControlAction
-                label="Full-run invalidation"
-                busy={busy}
-                onSubmit={(body) =>
-                  void act(
-                    `${projectPath(project)}/executions/${c.execution}/seeded-controls/${encodeURIComponent(c.scenario)}/invalidate`,
-                    body,
-                  )
-                }
-              />
+              <details>
+                <summary>Full-run invalidation</summary>
+                <ControlAction
+                  label="Full-run invalidation"
+                  busy={busy}
+                  onSubmit={(body) =>
+                    void act(
+                      `${projectPath(project)}/executions/${c.execution}/seeded-controls/${encodeURIComponent(c.scenario)}/invalidate`,
+                      body,
+                    )
+                  }
+                />
+              </details>
             )}
         </section>
       ))}

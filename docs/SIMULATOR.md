@@ -1,4 +1,23 @@
-# Aster simulator — content rules and UI-5 controls
+# Aster simulator — content rules and UI-6 decision examples
+
+## UI-6 decision Project
+
+decision-project.yaml adds ten Scenarios without changing simulator rules: reliable
+grounded, unsupported, approximate and permanently down-Judge cases; blind and
+overcall product cases; construction-confirmed defect/clean controls assessed by
+both; a slow subject response; and a Human safety review. Only the slow Scenario
+has a latency Constraint. Gates and all metrics are evaluated by the engine.
+The simulator never computes readiness, overrides or Release Decisions. The
+permanently down Judge avoids coupling this sample to the flaky outage switch.
+See examples/aster/README.md for exact Gate expectations and the stale walkthrough.
+
+UI-6 Reference Set version 3 adds two rule disagreements without changing the Judge:
+the grounding rule checks amounts, durations and explicitly shaped eligibility clauses,
+so it misses an unsupported loyalty-bonus statement; it also compares currency strings
+literally, rejecting faithful `$49.00` where the source spells `$49`. The reliable
+Judge scores 23/25 agreement after its one exposed item is excluded (κ≈0.840); the
+amount-blind Judge scores 13/26 (κ=0.000). Each disagreement is explained in the item
+labelling_note, which is never sent to the Judge. See the README's two 2×2 tables.
 
 ## UI-5 Reference Set and control examples
 

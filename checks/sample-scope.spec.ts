@@ -50,7 +50,11 @@ test("review sample scope change through shared Apply, run Suite and inspect eve
   await expect(
     page.getByRole("heading", { name: /Apply (complete|no changes)/ }),
   ).toBeVisible();
+  // Completion is recorded before the workspace reload finishes. Wait for the
+  // operation to release the editor before selecting the next file.
+  await expect(page.getByRole("button", { name: "Review & Apply", exact: true })).toBeEnabled();
   await page.getByRole("button", { name: "project.yaml", exact: true }).click();
+  await expect(page.locator(".editor-heading strong")).toHaveText("project.yaml");
   const sample = parse(
     readFileSync("examples/aster/project.yaml", "utf8"),
   ).project;
@@ -110,6 +114,7 @@ test("review sample scope change through shared Apply, run Suite and inspect eve
   }
   await page.goto("/#workspace");
   await expect(page.getByTestId("yaml-editor")).toBeVisible();
+  await expect(page.locator(".editor-heading strong")).toHaveText("project.yaml");
   await page.getByTestId("yaml-editor").fill(stringify(document));
   await page
     .getByRole("button", { name: "Review & Apply", exact: true })
@@ -127,6 +132,7 @@ test("review sample scope change through shared Apply, run Suite and inspect eve
   await expect(
     page.getByRole("heading", { name: /Apply (complete|no changes)/ }),
   ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Review & Apply", exact: true })).toBeEnabled();
   const response = await page.request.post(
     "/api/projects/aster-support/executions",
     { data: { suite: "support-behaviours", environment: "local-simulation" } },
@@ -149,4 +155,38 @@ test("review sample scope change through shared Apply, run Suite and inspect eve
     for (const result of results.filter((r: any) => r.oracle_type === "judge"))
       expect(scoped[execution.scenario]).toContain(result.clause);
   }
+  const decisionSource = await page.request.get(
+    "/workspace/files?path=decision-project.yaml",
+  );
+  if (decisionSource.status() === 404) {
+    await page.goto("/#workspace");
+    await expect(page.getByTestId("yaml-editor")).toBeVisible();
+    await page.evaluate(
+      (content) =>
+        window.dispatchEvent(
+          new CustomEvent("aqef-propose-source", {
+            detail: { path: "decision-project.yaml", content },
+          }),
+        ),
+      readFileSync("examples/aster/decision-project.yaml", "utf8").replace(
+        /\r\n/g,
+        "\n",
+      ),
+    );
+    await expect(page.getByLabel("YAML diff", { exact: true })).toContainText(
+      "aster-support-decisions",
+    );
+    await page
+      .getByRole("button", { name: "Review & Apply", exact: true })
+      .click();
+    await expect(
+      page.getByRole("region", { name: "Apply preview" }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Confirm Apply", exact: true })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: /Apply (complete|no changes)/ }),
+    ).toBeVisible();
+  } else expect(decisionSource.status()).toBe(200);
 });

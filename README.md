@@ -1,10 +1,10 @@
 # AQEF Reference UI
 
-Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-5** adds
-Admission (S-7), Seeded Controls (S-9), control authoring and corrected-Oracle recovery.
-Evidence is readable first, with engine JSON disclosed and frozen configuration last.
-Existing authoring, Connections, Explorer and Runs remain available. No `reference_ui`
-or CTS conformance is claimed; UI-6 remains.
+Local, single-user presentation and authoring layer for AQEF 1.0-CR1. **UI-6** completes
+the Stage 1 screen set with Gates, frozen Reports, a live Dashboard, single-GateResult
+overrides and Release Decisions. Admission, Controls, authoring and Evidence remain
+available. No `reference_ui` or CTS conformance is claimed. See the
+[Stage 1 closeout and inspection map](docs/STAGE-1-CLOSEOUT.md).
 
 ## Start locally
 
@@ -26,7 +26,8 @@ All published ports bind only to loopback. There are four long-running services:
 * `workspace`: YAML-only file service, port 9200, host-mounted `./workspace`;
 * `ui`: static React/TypeScript application in nginx, port 3000.
 
-Startup waits for the simulator, then loads `examples/aster/project.yaml` through
+Startup waits for the simulator, then loads `examples/aster/project.yaml` and
+`examples/aster/decision-project.yaml` through
 the engine REST API as the bootstrap Person (`admin`). The engine records the
 governed Contract definition. If the Project already exists, startup preserves it,
 including changes and history. It never silently overwrites the running Project.
@@ -40,7 +41,7 @@ in the browser is needed. Existing Principals and Roles are not overwritten.
 See [identity limitations and choices](docs/AMBIGUITIES.md#ui-a17--local-reviewer-identity-without-a-current-principal-endpoint).
 
 The workspace service separately seeds an empty `./workspace` from `examples/aster/`.
-Existing files are never overwritten by seeding. To adopt the UI-5 sample in an
+Existing files are never overwritten by seeding. To adopt the UI-6 sample in an
 existing workspace, copy the desired scoped Contract changes from the example into
 the Workspace YAML editor, use **Review & Apply**, inspect the diff, then
 **Confirm Apply**. The [sample scope table](examples/aster/README.md) explains which
@@ -53,6 +54,24 @@ the token used for that database. Do not remove the volume unless you intend to
 discard all local history.
 
 ## What to inspect
+
+* **Gates**: choose `aster-support-decisions`, run `release-readiness` in Runs, then
+  evaluate every applicable Gate for that batch. Five Gates show multiple reasons,
+  full Basis, ThresholdMap, `not_computed`, an advisory failure and a blocking pass.
+  Numbers open the engine-listed Results and UI-4 Evidence. Override names exactly
+  one failed blocking GateResult; its recorded status stays `fail`.
+* **Reports**: generate a frozen document with its generation time, scope, Snapshot,
+  copied Gates, Metrics and all six signal lists. Its paper layout and persistent
+  amber banner differ from the Dashboard. It makes no live reads or polls.
+* **Dashboard**: green live view, last refresh time, five-second read-only refresh,
+  recorded Gates, Result counts and linked open work. Trends plot engine values;
+  `not_computed` leaves a gap. G-8 limits history to observed evaluation responses
+  and engine-owned copies in Reports; other sessions' unreported evaluations cannot
+  be listed by the pinned API. No quality aggregate is computed by the browser.
+* **Release Decisions**: explicitly choose a Report, batch and decision, review the
+  copied blocking/advisory Gate map, and submit notes. The engine accepts or refuses;
+  immutable history keeps its original Gate map. See the
+  [decision walkthrough](examples/aster/README.md#ui-6-gates-reports-and-release-decisions).
 
 * **Admission**: the ordered workflow chooses an exact Oracle and Reference Set version,
   excludes exposed items, records a Person/time/threshold declaration in workspace,
@@ -99,7 +118,8 @@ discard all local history.
   Prompt, Variables/Dataset binding and Constraint/Single Judge clauses. All author
   fields start empty. Every change shows its YAML diff and uses the exact same
   Review & Apply path as the editor; the engine computes the effective Contract.
-* **Test Explorer**: browse Project and Suite definitions, filter twenty Scenarios,
+* **Test Explorer**: browse Project and Suite definitions, filter the twenty original
+  Scenarios and ten separate decision examples,
   inspect their Contracts, Dataset binding, recorded Baselines, latest Execution,
   its engine Results and frozen Evidence. Entries are grouped by clause and show
   Oracle kind/identifier, disposition, verdict, Confidence/not applicable, recorded
@@ -111,9 +131,10 @@ discard all local history.
   human-labelled simulation Reference Set. No Judge is automatically admitted.
 
 The UI displays engine data; it performs no Contract composition, Result resolution,
-quality aggregation, Gate evaluation or Admission decision. Raw runtime records are
-displayed as JSON in this foundation slice. Baseline records are not presented as a
-proof of current validity; see [recorded gaps](docs/AMBIGUITIES.md).
+quality aggregation or Gate evaluation. Admission arithmetic is shown for a Person's
+review under the UI-5 authorization. Exact runtime records remain behind disclosures.
+Baselines/regression Gates, Release Policies and broader Trends are deferred.
+Baseline records are not proof of current validity; see [recorded gaps](docs/AMBIGUITIES.md).
 
 ## Source pins and architecture
 
@@ -179,6 +200,10 @@ UI-5 adds readable Evidence/panel disclosures, pre-results Admission declaration
 exposure exclusion, independently checked agreement arithmetic, exact Admission
 payloads and later withdrawal, control authoring, miss/false-alarm/invalid records,
 confirmation refusals, invalidation, fresh Requalification and corrected chains.
+UI-6 adds multi-reason Gates, immutable evaluation IDs, exact evidence drill-down,
+Report isolation, Dashboard polling, gapped Trends, real override 403/404/409 and
+stale Release Decision refusals. The complete development suite has 45 browser
+checks and 12 Python integration checks.
 These are independently
 authored checks, **not CTS tests**. Stop the user Compose deployment before the
 development checks because they use the same ports; its database volume is retained.
@@ -189,6 +214,7 @@ servers:
 ```sh
 npm run test:e2e -- --config playwright.docker.config.ts
 npm run test:e2e -- --config playwright.trust-docker.config.ts
+npm run test:e2e -- --config playwright.decisions-docker.config.ts
 ```
 
 These six checks browse the built static UI through nginx, check provider health
@@ -198,7 +224,7 @@ Results and Evidence. UI-4 run controls never request Gates; the retained older
 deployment regression separately checks the pre-existing sample Gate API.
 The checks can be repeated without resetting the database. Compose startup and
 preservation of that history across an engine/UI restart have been verified.
-The second command checks eight UI-5 workflows against the built deployment. It
+The second command checks nine UI-5 workflows against the built deployment. It
 records diagnostic Projects, Admission plans and control/recovery history in the
 local workspace/database; it does not add the disposable authoring-test Scenario.
 Each Compose workflow check starts a fresh `ui5-check-<uuid>` sample Project through
@@ -207,6 +233,8 @@ instruments. Existing Aster configuration and all history stay in place.
 For an existing UI-4 sample, review/apply the UI-5 sample additions first; startup
 preserves existing workspace files and engine Projects. The owned-sample migration
 check is `npm run test:e2e -- --config playwright.sample.config.ts`.
+The third command checks eight UI-6 workflows in a fresh decision Project through
+the built nginx UI. These independent records remain as inspectable local history.
 
 To regenerate the engine vendor snapshot from a local engine checkout that contains
 the pinned commit: `python scripts/vendor_engine.py PATH_TO_ENGINE_CHECKOUT`.
@@ -216,10 +244,11 @@ OpenAPI document. No conformance or other specification test material is accesse
 See [implementation and verification](docs/IMPLEMENTATION_NOTES.md),
 [ambiguities and gaps](docs/AMBIGUITIES.md), and [simulator contract](docs/SIMULATOR.md).
 
-## Next slices
+## Inspection and deferred scope
 
-UI-6: Gates, frozen Reports and live Dashboard.
-An external reviewer for final inspection remains to be named by the owner; that
-does not block UI-1. No CTS pass or signed inspection is claimed by this build.
+An external reviewer for final inspection remains to be named by the owner.
+CT-RUI-002–004 are ready for external inspection; no CTS pass or signed inspection
+is claimed. Baselines/regression Gates (G-5), Release Policies, public deployment
+and broader historical analytics remain outside this slice.
 
 Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

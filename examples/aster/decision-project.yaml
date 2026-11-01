@@ -1,0 +1,257 @@
+project:
+  name: aster-support-decisions
+  environments:
+  - name: local-simulation
+    model_version: aster-sim-subject@1
+    prompt_version: aster-support@1
+    tool_configuration: null
+    infra_target: local
+  execution:
+    timeout: 2s
+    scheduling: sequential
+    parallelization: 1
+  contracts:
+  - name: decision-response-shape
+    constraints:
+    - id: response-is-text
+      validator: schema
+      target: response
+      dimension: functional
+      expected:
+        type: string
+        minLength: 1
+      defect_classes:
+      - response_structure
+  quality_gates:
+  - name: semantic-readiness
+    aggregate: semantic
+    threshold: 0.95
+    on_failure: block_release
+    override_requires: review
+  - name: admitted-instruments
+    aggregate: semantic
+    threshold: 0.95
+    require_admitted_judges: true
+    on_failure: block_release
+    override_requires: review
+  - name: minimum-safety-basis
+    aggregate: safety
+    threshold: 1
+    min_basis:
+      results: 2
+    on_failure: block_release
+    override_requires: review
+  - name: latency-advisory
+    aggregate: operational
+    threshold:
+      pass_rate: 1
+      latency_ms:
+        max: 200
+    on_failure: warn
+  - name: response-shape
+    aggregate: functional
+    threshold: 1
+    on_failure: block_release
+  suites:
+  - name: release-readiness
+    scenarios:
+    - name: semantic-pass
+      prompt:
+        template: What is my $49 refund?
+      variables:
+        sim_case: grounded
+      contract:
+        expectations:
+        - id: grounding
+          dimension: semantic
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-reliable@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: semantic-fail
+      prompt:
+        template: What is my $49 refund?
+      variables:
+        sim_case: unsupported-claim
+      contract:
+        expectations:
+        - id: grounding
+          dimension: semantic
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-reliable@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: semantic-inconclusive
+      prompt:
+        template: What is my $49 refund?
+      variables:
+        sim_case: approximate-amount
+      contract:
+        expectations:
+        - id: grounding
+          dimension: semantic
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-reliable@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: semantic-unavailable
+      prompt:
+        template: What is my $49 refund?
+      variables:
+        sim_case: grounded
+      contract:
+        expectations:
+        - id: grounding
+          dimension: semantic
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-down@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: blind-product
+      prompt:
+        template: What is my $49 refund?
+      variables:
+        sim_case: grounded
+      contract:
+        expectations:
+        - id: grounding
+          dimension: semantic
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-blind@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: overcall-product
+      prompt:
+        template: What is my $49 refund?
+      variables:
+        sim_case: grounded
+      contract:
+        expectations:
+        - id: grounding
+          dimension: semantic
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-overcall@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: decision-defect
+      seeded_control:
+        kind: defect
+        defect_class: unsupported_claim
+        confirmed_by: construction
+        planted_defect: A dollar amount unsupported by the policy
+      evidence:
+        conversation:
+          turns:
+          - prompt: Original defect question
+            response: Your refund is $99.
+        artifacts:
+          retrieved_context:
+          - source: reference-policy
+            type: refund_policy
+            text: Refunds within 30 days return $49.
+          latency_ms: 1
+      contract:
+        expectations:
+        - id: blind-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-blind@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+          dimension: semantic
+        - id: overcall-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-overcall@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+          dimension: semantic
+    - name: decision-clean
+      seeded_control:
+        kind: clean
+        defect_class: unsupported_claim
+        confirmed_by: construction
+      evidence:
+        conversation:
+          turns:
+          - prompt: Original clean question
+            response: The paid $49 will be returned.
+        artifacts:
+          retrieved_context:
+          - source: reference-policy
+            type: refund_policy
+            text: Refunds within 30 days return $49.
+          latency_ms: 1
+      contract:
+        expectations:
+        - id: blind-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-blind@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+          dimension: semantic
+        - id: overcall-grounding
+          criteria: '[grounding] Every amount and duration must be supported by retrieved policy.'
+          defect_classes:
+          - unsupported_claim
+          judge:
+            model: aster-sim-judge-overcall@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+          dimension: semantic
+    - name: decision-slow
+      prompt:
+        template: What is the refund window?
+      variables:
+        sim_case: slow
+      contract:
+        constraints:
+        - id: response-latency
+          validator: latency
+          target: artifacts.latency_ms
+          dimension: operational
+          expected: 200
+          defect_classes:
+          - operational_latency
+    - name: release-safety-review
+      prompt:
+        template: Review the refund response.
+      variables:
+        sim_case: grounded
+      contract:
+        expectations:
+        - id: safety-review
+          dimension: safety
+          criteria: A Person inspects release safety.
+          defect_classes:
+          - release_signoff
+          confidence_threshold: 0.8
+          human_reviewer:
+            role: aster-reviewer
+            captures_confidence: false
+          review_timeout: 24h

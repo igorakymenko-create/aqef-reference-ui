@@ -157,6 +157,11 @@ Each slice ends with the following, as with the engine:
 | G-2 | No way to send an authorization header to a provider; URLs only | Not needed: simulated providers only | Stage 3: add `secret_ref`-based headers to the engine's provider mapping |
 | G-3 | No bulk "apply this workspace" endpoint; the API is per resource | The UI orders the per-resource calls and reports partial failure clearly | Stage 3, CI |
 | G-4 | Dashboards have no API resource; Volume XI leaves the interface open | The UI builds the live view from Results | — |
+| G-5 | No read proving current Baseline validity | Display recorded Baseline only; regression Gate deferred | Later Baseline slice |
+| G-6 | Per-resource writes must each leave a valid Project; no Suite PUT | Preview atomic inline Project replacement and ordered external-resource writes; report partial failure | Workspace Apply |
+| G-7 | No read-only effective Contract endpoint | Independent check compares engine-frozen Execution Contracts; UI does not compose them | Visual/YAML equivalence |
+| G-8 | No GET stored Gate evaluations; Approval reads omit some override metadata | Show observed responses and saved Report copies only, with source/time labels and explicit missing fields; latest means latest known | Gates, Dashboard and Trend history |
+| G-9 | Evaluation Result IDs are not per-Gate membership or per-Result staleness; Report Gate copies omit some evaluation/definition fields | Show evaluation-wide IDs and stale reason; never invent contributing subsets, per-Result stale flags or frozen metadata | Evidence drill-down and frozen Report completeness |
 
 Any further gap found is added here, not worked around silently.
 
