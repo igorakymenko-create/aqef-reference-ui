@@ -275,8 +275,12 @@ test.describe
   }) => {
     await page.goto(`/#report/${project}/${oldReport.id}`);
     await expect(page.getByTestId("frozen-marker")).toContainText(
-      oldReport.generated_at,
+      `frozen at ${oldReport.generated_at}`,
+      { useInnerText: true },
     );
+    await expect(page.locator("body")).not.toContainText("may differ", {
+      useInnerText: true,
+    });
     await expect(page.getByTestId("live-marker")).toHaveCount(0);
     const before = await page.getByTestId("frozen-report").textContent(),
       reads: string[] = [];

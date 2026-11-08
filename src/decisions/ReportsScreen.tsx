@@ -117,10 +117,15 @@ export function ReportDocument({ route }: { route: string }) {
   return (
     <div className="report-shell">
       <header className="frozen-banner" data-testid="frozen-marker">
-        <strong>
-          Frozen Report — generated at{" "}
-          {report?.generated_at ?? "not returned yet"}
-        </strong>
+        <span>
+          <strong>Frozen Report</strong>
+          {report && (
+            <>
+              {" "}— frozen at {report.generated_at}. Nothing on this page changes
+              after that moment.
+            </>
+          )}
+        </span>
         <nav>
           <a href={routeLink("gates", project, batch)}>Gates</a>
           <a href={routeLink("reports", project)}>Report library</a>
@@ -149,7 +154,9 @@ export function ReportDocument({ route }: { route: string }) {
             <h1>Report</h1>
             <p className="report-id">{report.id}</p>
             <p className="immutable-note">
-              Current state may differ; this Report does not change.{" "}
+              This Report records the state at {report.generated_at}. Results,
+              reviews or overrides recorded after that moment are not in it. For
+              the current state,{" "}
               <a
                 href={routeLink(
                   "dashboard",
@@ -158,8 +165,9 @@ export function ReportDocument({ route }: { route: string }) {
                   report.scope?.environments?.[0] ?? "",
                 )}
               >
-                Open the Dashboard.
+                open the live Dashboard
               </a>
+              .
             </p>
             <section aria-label="Report scope">
               <h2>Scope and Snapshot</h2>

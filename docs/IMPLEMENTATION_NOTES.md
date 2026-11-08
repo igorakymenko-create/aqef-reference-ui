@@ -1,5 +1,18 @@
 # Implementation notes
 
+## UI-6.1 — Report wording
+
+In the CT-RUI-004 review on 2026-11-08, the reviewer could not identify when
+the Report was frozen and found the reason for opening the Dashboard unclear.
+The persistent banner now says “frozen at” with the timestamp as returned by
+the engine. The Report explains that later Results, reviews and overrides are
+outside the frozen record and links to the live Dashboard for the same Suite
+and Environment. The browser check asserts that the freeze time is visible and
+the phrase “may differ” is absent.
+
+Three consecutive complete runs passed with the checked-in timeout settings.
+Each run passed all 12 integration checks and all 46 browser checks.
+
 ## UI-6 review fixes — F-1 and F-2
 
 F-1 was a real SimulatorControl race: an initial GET could settle after the POST
