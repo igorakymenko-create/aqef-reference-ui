@@ -1,0 +1,58 @@
+{
+  "review_id": "rui-004-human-1",
+  "test_id": "CT-RUI-004",
+  "case_id": "CT-RUI-004",
+  "method": "inspection",
+  "reviewer": {
+    "id": "person://alona-marchenko",
+    "role": "independent-reviewer",
+    "affiliation": "Family member of the commissioning owner; no involvement in the UI's development"
+  },
+  "checklist": [
+    {
+      "item_id": "1",
+      "statement": "Each states what it is (the Report)",
+      "answer": "met",
+      "evidence_refs": ["evidence://ct-rui-004-report-first-screen.png", "evidence://ct-rui-004-report-full-page.png"],
+      "note": "Reviewer: \"Every single report has a phrase 'Frozen Report' at the top of the screen\""
+    },
+    {
+      "item_id": "2",
+      "statement": "Each states what it is (the Dashboard)",
+      "answer": "met",
+      "evidence_refs": ["evidence://ct-rui-004-dashboard-first-screen.png", "evidence://ct-rui-004-dashboard-full-page.png"],
+      "note": "Reviewer: \"Every single Dashboard has phrases 'updates as new Results arrive' and 'Automatic refresh every5 seconds'\""
+    },
+    {
+      "item_id": "3",
+      "statement": "the Report shows the moment it was frozen",
+      "answer": "undecided",
+      "evidence_refs": ["evidence://ct-rui-004-report-first-screen.png", "evidence://ct-rui-004-report-full-page.png"],
+      "note": "Reviewer: \"I see the 'generated at ...' phrase, but there is no 'frozen at' phrase\""
+    },
+    {
+      "item_id": "4",
+      "statement": "Fails if: A viewer could take either for the other from what the UI shows (met = they cannot be taken for each other)",
+      "answer": "met",
+      "evidence_refs": [
+        "evidence://ct-rui-004-report-first-screen.png",
+        "evidence://ct-rui-004-dashboard-first-screen.png",
+        "evidence://ct-rui-004-dashboard-live-t0.png",
+        "evidence://ct-rui-004-dashboard-live-t16.png",
+        "evidence://ct-rui-004-report-live-t0.png",
+        "evidence://ct-rui-004-report-live-t16.png",
+        "evidence://ct-rui-004-dashboard-after-change.png",
+        "evidence://ct-rui-004-report-earlier-after-change.png",
+        "evidence://ct-rui-004-measurements.json",
+        "evidence://step1-blind-A.png",
+        "evidence://step1-blind-B.png"
+      ],
+      "note": "Reviewer: \"They have different UI and names\". Blind step 1 (before any evidence): chose B as the frozen Report (correct), cue: the words \"Report\" and \"Frozen Report\" at the top (as recorded by the owner), confidence: guessing."
+    }
+  ],
+  "decision": "NOT_RUN",
+  "reason_code": "UNRESOLVED_INTERPRETATION",
+  "signed_at": "2026-11-08T00:00:00-07:00",
+  "signature_ref": "pending://owner-attestation",
+  "notes": "Form: plain-language questions (STEP-2, English) mapped to the checklist by the owner's assistant: Q1->1, Q2->2, Q3->3, Q4->4 ('No, they can't be mixed up' = met). Fixture deviation (UI sample instead of F-SIGNALS): reviewer says it does not change her answers. Reviewer comment: \"In Reports, there is a phrase 'Current state may differ'. It may confuse users as the Report is frozen, but this phrase says that something can change.\" Reviewer's question during the review, verbatim: \"Why do we have a phase 'Current state may differ; Report does not change. Open the Dashboard'. - Why should I open Dashboard? Why the state may differ if the Report is frozen?\" Reviewer gave the date only; the time 00:00 local is a placeholder, not a recorded time. Evidence captured by an independent AI inspector (Gemini), run rui-inspection-r2, on a PC whose clock was one hour ahead of UTC."
+}

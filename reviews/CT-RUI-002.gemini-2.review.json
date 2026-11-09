@@ -1,0 +1,47 @@
+{
+  "review_id": "rui-002-gemini-2",
+  "test_id": "CT-RUI-002",
+  "case_id": "CT-RUI-002",
+  "method": "inspection",
+  "reviewer": {
+    "id": "reviewer://google/gemini-3.8-flash",
+    "role": "independent-inspector",
+    "affiliation": "AI system, commissioned by Igor Akymenko"
+  },
+  "checklist": [
+    {
+      "item_id": "1",
+      "statement": "The first cannot be done.",
+      "answer": "met",
+      "evidence_refs": [
+        "evidence://ct-rui-002-builtin-form.png",
+        "evidence://ct-rui-002-registered-form.png",
+        "evidence://ct-rui-002-custom-form.png",
+        "evidence://ct-rui-002-builtin-conf-expected.png",
+        "evidence://ct-rui-002-builtin-conf-diff.png",
+        "evidence://ct-rui-002-yaml-confidence-editor.png",
+        "evidence://ct-rui-002-yaml-confidence-refusal.png",
+        "evidence://ct-rui-002-yaml-threshold-editor.png",
+        "evidence://ct-rui-002-yaml-threshold-refusal.png"
+      ],
+      "note": "Audited built-in, registered, and custom Validator Designer forms; none expose any input field, dropdown, or toggle for Confidence or Confidence threshold. In custom validator registration, deterministic operations (equals, range, schema, forbidden-content, structural) take rule definitions, not confidence. When confidence keys ('confidence: 0.95', 'confidence_threshold: 0.80') are entered into the Expected YAML text area of a built-in schema validator, the UI places them inside the schema dictionary argument passed to validator 'schema' (evidence://ct-rui-002-builtin-conf-diff.png); they are payload argument data evaluated by the schema checker, not a Confidence value or threshold carried by the Validator itself. Direct authoring of 'confidence: 0.9' or 'confidence_threshold: 0.8' on a Constraint in the Workspace YAML editor is refused by UI preflight checks with 'Volume XV / Volume V: a Validator MUST be deterministic and MUST NOT carry a Confidence value. A model deciding pass/fail is configuring a Judge.' (evidence://ct-rui-002-yaml-confidence-refusal.png, evidence://ct-rui-002-yaml-threshold-refusal.png), blocking Apply and preserving the workspace and engine states unchanged."
+    },
+    {
+      "item_id": "2",
+      "statement": "The second is refused or redirected to Judge configuration, with the reason shown.",
+      "answer": "met",
+      "evidence_refs": [
+        "evidence://ct-rui-002-model-yes-refusal.png",
+        "evidence://ct-rui-002-redirected-to-judge.png",
+        "evidence://ct-rui-002-model-yes-engine-before.json",
+        "evidence://ct-rui-002-model-yes-engine-after.json"
+      ],
+      "note": "In the Custom Validator Designer, setting 'Does this check call a model, or any non-deterministic service, to decide pass or fail?' to 'yes' immediately surfaces an explicit refusal message citing Volume XV / Volume V: 'a Validator MUST be deterministic and MUST NOT carry a Confidence value. A model deciding pass/fail is configuring a Judge.' (evidence://ct-rui-002-model-yes-refusal.png). The Review & Apply button is disabled, proposing YAML is blocked, and an actionable redirect link 'Open Judge Configuration with entered draft' is provided, which successfully transitions to the Judge Configuration screen at #judges with draft criteria pre-populated (evidence://ct-rui-002-redirected-to-judge.png). Engine GET responses and workspace SHA-256 before and after confirm nothing was saved."
+    }
+  ],
+  "decision": "PASS",
+  "reason_code": "VERIFIED",
+  "signed_at": "2026-11-02T04:33:30Z",
+  "signature_ref": "pending://owner-attestation",
+  "notes": "Verified through automated script capture including direct form audit, payload differentiation testing, direct Constraint YAML authoring, and before/after verification of workspace SHA-256 and read-only engine GET responses."
+}

@@ -1,0 +1,34 @@
+{
+  "review_id": "rui-003-gemini-2",
+  "test_id": "CT-RUI-003",
+  "case_id": "CT-RUI-003",
+  "method": "inspection",
+  "reviewer": {
+    "id": "reviewer://google/gemini-3.8-flash",
+    "role": "independent-inspector",
+    "affiliation": "AI system, commissioned by Igor Akymenko"
+  },
+  "checklist": [
+    {
+      "item_id": "1",
+      "statement": "The UI does not save until a purpose is chosen.",
+      "answer": "met",
+      "evidence_refs": [
+        "evidence://ct-rui-003-multi-no-purpose-form.png",
+        "evidence://ct-rui-003-multi-with-purpose.png",
+        "evidence://ct-rui-003-multi-diff-preview.png",
+        "evidence://ct-rui-003-yaml-multijudge-no-purpose.png",
+        "evidence://ct-rui-003-no-purpose-engine-before.json",
+        "evidence://ct-rui-003-no-purpose-engine-after.json",
+        "evidence://ct-rui-003-yaml-multijudge-engine-before.json",
+        "evidence://ct-rui-003-yaml-multijudge-engine-after.json"
+      ],
+      "note": "When configuring a Multi Judge panel on an Expectation in Judge Configuration (#judges), the Multi Judge purpose dropdown defaults to 'Choose explicitly…'. Leaving it unselected blocks second judge configuration, displays 'Form incomplete — choose: Multi Judge purpose, Judge 2 model, Judge 2 confidence_source', and keeps Review & Apply disabled (evidence://ct-rui-003-multi-no-purpose-form.png). Selecting an explicit choice ('independence') immediately enables second judge fields and Review & Apply, proposing a YAML diff with 'purpose: independence' (evidence://ct-rui-003-multi-with-purpose.png, evidence://ct-rui-003-multi-diff-preview.png). Authoring a multi_judge panel without 'purpose' directly in the Workspace YAML editor is refused by UI preflight checks with 'Volume XV / Volume VI / Appendix A.7: Multi Judge MUST declare an explicit purpose: independence or stability.' and 'must have required property \\'purpose\\'' (evidence://ct-rui-003-yaml-multijudge-no-purpose.png), blocking Apply. Engine GET responses and workspace SHA-256 before and after confirm that nothing was saved and no default purpose was ever chosen by the UI."
+    }
+  ],
+  "decision": "PASS",
+  "reason_code": "VERIFIED",
+  "signed_at": "2026-11-02T04:38:55Z",
+  "signature_ref": "pending://owner-attestation",
+  "notes": "Verified across Judge Configuration form interaction, diff generation preview, direct Workspace YAML authoring refusal, and before/after verification of workspace SHA-256 and read-only engine GET responses."
+}

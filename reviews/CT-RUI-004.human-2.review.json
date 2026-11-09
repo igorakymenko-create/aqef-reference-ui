@@ -1,0 +1,67 @@
+{
+  "review_id": "rui-004-human-2",
+  "test_id": "CT-RUI-004",
+  "case_id": "CT-RUI-004",
+  "method": "inspection",
+  "reviewer": {
+    "id": "person://alona-marchenko",
+    "role": "independent-reviewer",
+    "affiliation": "Family member of the commissioning owner; no involvement in the UI's development"
+  },
+  "checklist": [
+    {
+      "item_id": "1",
+      "statement": "Each states what it is (the Report)",
+      "answer": "met",
+      "evidence_refs": [
+        "evidence://ct-rui-004-report-first-screen.png",
+        "evidence://ct-rui-004-report-full-page.png"
+      ],
+      "note": "Reviewer: \"Every single report has a phrase 'Frozen Report' at the top of the screen\""
+    },
+    {
+      "item_id": "2",
+      "statement": "Each states what it is (the Dashboard)",
+      "answer": "met",
+      "evidence_refs": [
+        "evidence://ct-rui-004-dashboard-first-screen.png",
+        "evidence://ct-rui-004-dashboard-full-page.png"
+      ],
+      "note": "Reviewer: \"Every single Dashboard has phrases 'updates as new Results arrive' and 'Automatic refresh every 5 seconds'\""
+    },
+    {
+      "item_id": "3",
+      "statement": "the Report shows the moment it was frozen",
+      "answer": "met",
+      "evidence_refs": [
+        "evidence://ct-rui-004-report-first-screen.png",
+        "evidence://ct-rui-004-report-full-page.png"
+      ],
+      "note": "Reviewer: \"I see the 'records the state at ...' phrase, but there is still no 'frozen at' phrase. Not sure if there should be a specific 'frozen at' phrase, as 'records the state at ...' seems to be pretty clear\". Clarified by the owner, from the reviewer, 2026-11-08: the remark refers to the separate block under the Report title (the place of the earlier 'Current state may differ' line), not to the banner, which reads \"Frozen Report — frozen at 2026-11-08T23:09:28.000230+00:00. Nothing on this page changes after that moment.\" (evidence://ct-rui-004-report-first-screen.txt)."
+    },
+    {
+      "item_id": "4",
+      "statement": "Fails if: A viewer could take either for the other from what the UI shows (met = they cannot be taken for each other)",
+      "answer": "met",
+      "evidence_refs": [
+        "evidence://ct-rui-004-report-first-screen.png",
+        "evidence://ct-rui-004-dashboard-first-screen.png",
+        "evidence://ct-rui-004-dashboard-live-t0.png",
+        "evidence://ct-rui-004-dashboard-live-t1.png",
+        "evidence://ct-rui-004-report-live-t0.png",
+        "evidence://ct-rui-004-report-live-t1.png",
+        "evidence://ct-rui-004-dashboard-after-change.png",
+        "evidence://ct-rui-004-report-earlier-after-change.png",
+        "evidence://ct-rui-004-measurements.json",
+        "evidence://step1-blind-A.png",
+        "evidence://step1-blind-B.png"
+      ],
+      "note": "Reviewer: \"They have different UI and names\". Blind step 1 (2026-11-02, before any evidence, earlier UI wording): chose B as the frozen Report (correct), cue: the words \"Report\" and \"Frozen Report\" at the top (as recorded by the owner), confidence: guessing."
+    }
+  ],
+  "decision": "PASS",
+  "reason_code": "VERIFIED",
+  "signed_at": "2026-11-08T00:00:00-07:00",
+  "signature_ref": "pending://owner-attestation",
+  "notes": "Second round, after review rui-004-human-1 (NOT_RUN, item 3 undecided) led to UI-6.1 (commit 60c354e): the banner now states 'frozen at', and the line 'Current state may differ' was replaced. Evidence: run rui-inspection-004-r3 by an independent AI inspector (Gemini), captured by script on commit 60c354e, start 2026-11-08T23:09:13Z. Form: plain-language questions (STEP-2, English), mapped by the owner's assistant Q1->1 ... Q4->4. Fixture deviation (UI sample instead of F-SIGNALS): reviewer says it does not change her answers. Reviewer's remark, verbatim: \"Now in Reports, I see the phrase 'Results, reviews or overrides recorded after that moment are not in it. For the current state, open the live Dashboard,' which clearly means that the Report cannot be changed\". Reviewer gave the date only; the time 00:00 local is a placeholder, not a recorded time."
+}
