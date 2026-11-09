@@ -1,0 +1,21 @@
+{
+  "batch_id_second": "fddd448a-8ceb-4a3d-ae45-907f51e88e30",
+  "dashboard_after_change": {
+    "time": "2026-11-02T05:15:20Z",
+    "url": "http://localhost:3000/#dashboard",
+    "img": "evidence://ct-rui-004-dashboard-after-change.png",
+    "txt": "evidence://ct-rui-004-dashboard-after-change.txt",
+    "refresh_string": "Automatic refresh every 5 seconds \u00b7 last successful refresh: 2026-11-02T05:15:19.919Z"
+  },
+  "report_earlier_after_change": {
+    "time": "2026-11-02T05:15:21Z",
+    "url": "http://localhost:3000/#report/aster-support-decisions/ed14fa35-a0a3-48cf-88fa-052523a456d7",
+    "img": "evidence://ct-rui-004-report-earlier-after-change.png",
+    "txt": "evidence://ct-rui-004-report-earlier-after-change.txt"
+  },
+  "report_after_change_comparison": {
+    "dom_text_identical": true,
+    "pixel_identical_below_caption": true,
+    "pixel_check_details": "0 pixels difference below caption strip (identical)"
+  }
+}

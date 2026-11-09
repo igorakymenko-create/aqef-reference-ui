@@ -1,0 +1,132 @@
+a
+AQEF
+REFERENCE UI
+LOCAL WORKSPACE
+
+WORKSPACE
+
+✓
+Admission
+◈
+Seeded Controls
+≡
+Workspace
+◇
+Visual Test Designer
+✓
+Validator Designer
+◇
+Judge Configuration
+▦
+Test Explorer
+▷
+Runs and Evidence
+◇
+Gates
+▤
+Reports
+⌁
+Dashboard
+✓
+Release Decisions
+⌁
+Connections
+STAGE 1 · UI-6
+
+Definitions first.
+Evidence always.
+
+Local · single user
+Simulated providers
+AQEF 1.0-CR1
+Reference implementation
+Workspace / Validator Designer
+Local only
+A
+
+AUTHORING / YAML SOURCE OF TRUTH
+
+Validator Designer
+
+Propose YAML. Review the diff. Let the engine decide.
+
+Reload files
+Export engine configuration
+./workspace
+decision-project.yaml
+project.yaml
+reference-set.yaml
++ New YAML file
+project.yaml
+YAML editor
+Visual forms
+
+Volume XV: “MUST be deterministic and MUST NOT carry a Confidence value”. No model, network call, clock or random source decides a Validator verdict.
+
+Validator kind
+Choose explicitly…
+built-in
+registered
+custom
+Contract attachment
+Choose explicitly…
+Project · support-quality
+Project · new inline Contract
+Suite support-behaviours · new inline Contract
+Scenario support-behaviours/grounded-refund
+Scenario support-behaviours/unsupported-claim
+Scenario support-behaviours/retrieval-miss
+Scenario support-behaviours/claimed-completion
+Scenario support-behaviours/wrong-tool-argument
+Scenario support-behaviours/correct-refusal
+Scenario support-behaviours/over-refusal
+Scenario support-behaviours/slow-response
+Scenario support-behaviours/approximate-amount
+Scenario support-behaviours/recoverable-outage
+Scenario support-behaviours/human-signoff
+Scenario support-behaviours/panel-disagreement
+Suite instrument-checks · new inline Contract
+Scenario instrument-checks/unsupported-defect
+Scenario instrument-checks/faithful-clean
+Scenario instrument-checks/awaiting-confirmation
+Scenario instrument-checks/blind-subject-check
+Scenario instrument-checks/overcall-subject-check
+Scenario instrument-checks/reliable-subject-check
+Suite fresh-instrument-checks · new inline Contract
+Scenario fresh-instrument-checks/fresh-defect
+Scenario fresh-instrument-checks/fresh-clean
+Existing Constraint
+New Constraint
+Validator identifier (name@version)
+Constraint id (optional)
+Constraint dimension
+Omit; built-in dimension follows its documented type
+functional
+semantic
+operational
+safety
+Target
+Expected (YAML)
+Veto
+Omit — documented default false
+true
+false
+Contract validator_composition
+Omit policy contribution; engine resolves composition
+AND
+OR
+hard-veto
+
+Composition is a Contract policy, not a new Constraint property. Volume VII resolves the strictest contributed mode; this form does not compute it.
+
+Built-in parameters provided by this engine
+Authoring schema checks passed
+
+AQEF 1.0-CR1 A.1–A.10 / B.2 authoring subset. Cross-resource rules and all acceptance remain engine-authoritative.
+
+Form incomplete — choose: Contract attachment, target, expected, Validator identifier, Custom Validator dimension. No YAML is proposed yet.
+
+Documented engine defaults (comparison only; never inserted into authored YAML)
+YAML diff · before saving
+Form incomplete — choose: Contract attachment, target, expected, Validator identifier, Custom Validator dimension. No YAML is proposed yet.
+Review & Apply

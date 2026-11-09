@@ -1,0 +1,163 @@
+a
+AQEF
+REFERENCE UI
+LOCAL WORKSPACE
+
+WORKSPACE
+
+✓
+Admission
+◈
+Seeded Controls
+≡
+Workspace
+◇
+Visual Test Designer
+✓
+Validator Designer
+◇
+Judge Configuration
+▦
+Test Explorer
+▷
+Runs and Evidence
+◇
+Gates
+▤
+Reports
+⌁
+Dashboard
+✓
+Release Decisions
+⌁
+Connections
+STAGE 1 · UI-6
+
+Definitions first.
+Evidence always.
+
+Local · single user
+Simulated providers
+AQEF 1.0-CR1
+Reference implementation
+Workspace / Judge Configuration
+Local only
+A
+
+AUTHORING / YAML SOURCE OF TRUTH
+
+Judge Configuration
+
+Propose YAML. Review the diff. Let the engine decide.
+
+Reload files
+Export engine configuration
+./workspace
+decision-project.yaml
+project.yaml
+reference-set.yaml
++ New YAML file
+project.yaml
+YAML editor
+Visual forms
+Contract attachment
+Choose explicitly…
+Project · support-quality
+Project · new inline Contract
+Suite support-behaviours · new inline Contract
+Scenario support-behaviours/grounded-refund
+Scenario support-behaviours/unsupported-claim
+Scenario support-behaviours/retrieval-miss
+Scenario support-behaviours/claimed-completion
+Scenario support-behaviours/wrong-tool-argument
+Scenario support-behaviours/correct-refusal
+Scenario support-behaviours/over-refusal
+Scenario support-behaviours/slow-response
+Scenario support-behaviours/approximate-amount
+Scenario support-behaviours/recoverable-outage
+Scenario support-behaviours/human-signoff
+Scenario support-behaviours/panel-disagreement
+Suite instrument-checks · new inline Contract
+Scenario instrument-checks/unsupported-defect
+Scenario instrument-checks/faithful-clean
+Scenario instrument-checks/awaiting-confirmation
+Scenario instrument-checks/blind-subject-check
+Scenario instrument-checks/overcall-subject-check
+Scenario instrument-checks/reliable-subject-check
+Suite fresh-instrument-checks · new inline Contract
+Scenario fresh-instrument-checks/fresh-defect
+Scenario fresh-instrument-checks/fresh-clean
+Existing Expectation
+New Expectation
+grounding
+retrieval
+Judge type
+Choose explicitly…
+single
+multi
+Expectation id (optional)
+Expectation dimension
+Omit — documented default semantic
+functional
+semantic
+operational
+safety
+Judge criteria
+
+Aster simulator hint (never inserted automatically): begin criteria with [grounding], [retrieval], [completion], [tool-argument], [over-refusal] or [correct-refusal]. The pinned provider protocol has no separate Judge prompt field; criteria is the inspectable Judge instruction.
+
+Confidence threshold
+Multi Judge purpose
+Choose explicitly…
+independence
+stability
+
+Volume XV / Volume VI / Appendix A.7: Multi Judge MUST declare an explicit purpose: independence or stability.
+
+Judge 1
+Judge 1 model
+Judge 1 confidence_source
+Choose explicitly…
+self_rating
+token_probability
+agreement
+
+Admission · no record
+
+Consensus method
+Choose explicitly…
+Voting (voting)
+Consensus (confidence_weighted_mean)
+Voting threshold
+Omit — engine default majority applies
+majority
+unanimous
+Numeric fraction
+
+Engine documented default: threshold majority applies; it is not written into YAML.
+
+On disagreement
+Omit — engine default human_review applies
+human_review
+fail
+
+Engine documented default: on_disagreement human_review applies; it is not written into YAML.
+
+min_qualified (optional)
+
+Omitted quorum: the engine requires the full configured panel.
+
+SHOULD NOT share the subject's model family: correlated blind spots are possible. This is an identifier-based warning, not a refusal or a claim of verified independence.
+
+Admission is read-only here. Each displayed status comes from the latest exact-configuration record returned by the engine; no agreement measures or thresholds are evaluated by this screen.
+
+Authoring schema checks passed
+
+AQEF 1.0-CR1 A.1–A.10 / B.2 authoring subset. Cross-resource rules and all acceptance remain engine-authoritative.
+
+Form incomplete — choose: explicit purpose (independence or stability). No YAML is proposed yet. Volume XV / Volume VI / Appendix A.7: Multi Judge MUST declare an explicit purpose: independence or stability.
+
+Documented engine defaults (comparison only; never inserted into authored YAML)
+YAML diff · before saving
+Form incomplete — choose: explicit purpose (independence or stability). No YAML is proposed yet. Volume XV / Volume VI / Appendix A.7: Multi Judge MUST declare an explicit purpose: independence or stability.
+Review & Apply

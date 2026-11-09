@@ -1,0 +1,48 @@
+{
+  "batch_id_first": "c1a37737-e5e1-4268-baa9-3cf772c8cfe0",
+  "report_url": "http://localhost:3000/#report/aster-support-decisions/e6b5a2fc-e5df-47d4-9ed5-1f22b7fe1bd7",
+  "report_wording": {
+    "banner": "Frozen Report \u2014 frozen at 2026-11-08T23:09:28.000230+00:00. Nothing on this page changes after that moment.",
+    "line_under_title": "This Report records the state at 2026-11-08T23:09:28.000230+00:00. Results, reviews or overrides recorded after that moment are not in it. For the current state, open the live Dashboard."
+  },
+  "report_liveness_comparison": {
+    "dom_text_identical": true,
+    "pixel_identical_below_caption": true,
+    "pixel_check_details": "0 pixels difference below caption strip (identical)",
+    "interval_seconds": 16,
+    "file_t0": "ct-rui-004-report-live-t0.png",
+    "file_t1": "ct-rui-004-report-live-t1.png",
+    "time_t0": "2026-11-08T23:09:35Z",
+    "time_t1": "2026-11-08T23:09:51Z"
+  },
+  "dashboard_url": "http://localhost:3000/#dashboard",
+  "dashboard_liveness_comparison": {
+    "dom_text_identical": false,
+    "pixel_identical_below_caption": false,
+    "pixel_check_details": "Pixels differ within bounding box (710, 187, 761, 196)",
+    "t0_refresh_string": "Automatic refresh every 5 seconds \u00b7 last successful refresh: 2026-11-08T23:09:53.426Z",
+    "t1_refresh_string": "Automatic refresh every 5 seconds \u00b7 last successful refresh: 2026-11-08T23:10:08.361Z",
+    "interval_seconds": 16,
+    "file_t0": "ct-rui-004-dashboard-live-t0.png",
+    "file_t1": "ct-rui-004-dashboard-live-t1.png",
+    "time_t0": "2026-11-08T23:09:54Z",
+    "time_t1": "2026-11-08T23:10:10Z"
+  },
+  "batch_id_second": "0e257acf-7d0a-4adb-ab04-16906995cb7a",
+  "dashboard_after_change_comparison": {
+    "dom_text_identical": false,
+    "pixel_identical_below_caption": false,
+    "pixel_check_details": "Size difference: (1400, 9880) vs (1400, 9951)",
+    "refresh_string": "Automatic refresh every 5 seconds \u00b7 last successful refresh: 2026-11-08T23:10:26.417Z",
+    "time": "2026-11-08T23:10:27Z",
+    "url": "http://localhost:3000/#dashboard"
+  },
+  "report_after_change_comparison": {
+    "dom_text_identical": true,
+    "pixel_identical_below_caption": true,
+    "pixel_check_details": "0 pixels difference below caption strip (identical)",
+    "time": "2026-11-08T23:10:28Z",
+    "url": "http://localhost:3000/#report/aster-support-decisions/e6b5a2fc-e5df-47d4-9ed5-1f22b7fe1bd7"
+  },
+  "extra_batches_note": "None. Exactly two batches were created: batch 1 (c1a37737-e5e1-4268-baa9-3cf772c8cfe0) for the initial Suite run, Gate evaluation, and Report generation; batch 2 (0e257acf-7d0a-4adb-ab04-16906995cb7a) for re-running the Suite and re-evaluating Gates after change."
+}

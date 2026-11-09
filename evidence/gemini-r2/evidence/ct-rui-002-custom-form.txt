@@ -1,0 +1,105 @@
+a
+AQEF
+REFERENCE UI
+LOCAL WORKSPACE
+
+WORKSPACE
+
+✓
+Admission
+◈
+Seeded Controls
+≡
+Workspace
+◇
+Visual Test Designer
+✓
+Validator Designer
+◇
+Judge Configuration
+▦
+Test Explorer
+▷
+Runs and Evidence
+◇
+Gates
+▤
+Reports
+⌁
+Dashboard
+✓
+Release Decisions
+⌁
+Connections
+STAGE 1 · UI-6
+
+Definitions first.
+Evidence always.
+
+Local · single user
+Simulated providers
+AQEF 1.0-CR1
+Reference implementation
+Workspace / Validator Designer
+Local only
+A
+
+AUTHORING / YAML SOURCE OF TRUTH
+
+Validator Designer
+
+Propose YAML. Review the diff. Let the engine decide.
+
+Reload files
+Export engine configuration
+./workspace
+decision-project.yaml
+project.yaml
+reference-set.yaml
++ New YAML file
+project.yaml
+YAML editor
+Visual forms
+
+Volume XV: “MUST be deterministic and MUST NOT carry a Confidence value”. No model, network call, clock or random source decides a Validator verdict.
+
+Validator kind
+Choose explicitly…
+built-in
+registered
+custom
+Project
+Choose explicitly…
+aster-support-decisions
+aster-support
+Custom Validator name
+Custom Validator version
+Check description / proposed Judge criteria
+Implementation/model identifier (optional)
+Does this check call a model, or any non-deterministic service, to decide pass or fail?
+Choose explicitly…
+no
+yes
+Registration mode
+Choose explicitly…
+Register only
+Register and bind a Constraint
+Deterministic operation
+Choose explicitly…
+equals
+range
+schema
+forbidden-content
+structural
+Rule expected (YAML)
+Built-in parameters provided by this engine
+Authoring schema checks passed
+
+AQEF 1.0-CR1 A.1–A.10 / B.2 authoring subset. Cross-resource rules and all acceptance remain engine-authoritative.
+
+Form incomplete — choose: whether the check calls a model or non-deterministic service, registration mode, Project, Custom Validator name, Custom Validator version, deterministic operation, rule expected value. No YAML is proposed yet.
+
+Documented engine defaults (comparison only; never inserted into authored YAML)
+YAML diff · before saving
+Form incomplete — choose: whether the check calls a model or non-deterministic service, registration mode, Project, Custom Validator name, Custom Validator version, deterministic operation, rule expected value. No YAML is proposed yet.
+Review & Apply

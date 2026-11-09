@@ -1,0 +1,375 @@
+a
+AQEF
+REFERENCE UI
+LOCAL WORKSPACE
+
+WORKSPACE
+
+✓
+Admission
+◈
+Seeded Controls
+≡
+Workspace
+◇
+Visual Test Designer
+✓
+Validator Designer
+◇
+Judge Configuration
+▦
+Test Explorer
+▷
+Runs and Evidence
+◇
+Gates
+▤
+Reports
+⌁
+Dashboard
+✓
+Release Decisions
+⌁
+Connections
+STAGE 1 · UI-6
+
+Definitions first.
+Evidence always.
+
+Local · single user
+Simulated providers
+AQEF 1.0-CR1
+Reference implementation
+Workspace / Dashboard
+Local only
+A
+Live view — updates as new Results arrive
+
+Automatic refresh every 5 seconds · last successful refresh: 2026-11-08T23:10:26.417Z
+
+S-10 / ONGOING MONITORING
+
+Dashboard
+Refresh live view
+Dashboard Project
+Choose explicitly…
+aster-support
+aster-support-decisions
+Dashboard Suite
+Choose explicitly…
+release-readiness
+Dashboard Environment
+Choose explicitly…
+local-simulation
+
+G-8: the engine has no GET collection for stored Gate evaluations. This view shows evaluation responses observed here and Gate copies in saved Reports; unreported evaluations from another session are unavailable.
+
+Refresh reads engine data; it does not evaluate Gates or compute Metrics. Evaluate all applicable Gates →
+
+Latest returned stored Gate decisions
+
+Snapshot 5ad995c1-e260-4b02-9dae-14abee1c0227 · evaluated_at: 2026-11-08T23:10:19.872493+00:00 · batch 0e257acf-7d0a-4adb-ab04-16906995cb7a
+
+semantic-readiness
+
+GateResult c4b47ba0-16f8-40f3-9bb0-2d5219d207ca
+
+Aggregate: semantic
+
+status: fail
+Blocking
+Value
+0.500Open this evaluation's Result IDs and Evidence →
+Threshold
+0.950
+Aggregate Basis
+results
+2
+not_actionable
+4
+scenarios
+2
+executions
+2
+min_basis_met
+not_declared
+Every recorded reason
+non_actionable_results
+
+The aggregate included effective Results that are not actionable: inconclusive, awaiting_review, oracle_unavailable or not_assessed.
+
+seeded_control_false_alarm
+
+A false alarm on a clean control invalidated affected Results.
+
+seeded_control_miss
+
+An Oracle missed a defect control; affected Results cannot support a decision to ship.
+
+threshold
+
+The aggregate fell short of its declared threshold.
+
+Failed its threshold.
+
+Show engine record
+admitted-instruments
+
+GateResult 12bd0d3e-c6df-4600-93bf-a502c5257ba2
+
+Aggregate: semantic
+
+status: fail
+Blocking
+Value
+not_computedOpen this evaluation's Result IDs and Evidence →
+Threshold
+0.950
+Aggregate Basis
+results
+0
+not_actionable
+6
+scenarios
+0
+executions
+0
+min_basis_met
+not_declared
+Every recorded reason
+insufficient_basis
+
+The declared minimum Basis was not met, or no aggregate could be computed.
+
+judge_not_admitted
+
+The Gate requires admitted Judges and read a Judge configuration that is not admitted.
+
+non_actionable_results
+
+The aggregate included effective Results that are not actionable: inconclusive, awaiting_review, oracle_unavailable or not_assessed.
+
+seeded_control_false_alarm
+
+A false alarm on a clean control invalidated affected Results.
+
+seeded_control_miss
+
+An Oracle missed a defect control; affected Results cannot support a decision to ship.
+
+Show engine record
+minimum-safety-basis
+
+GateResult 7eed873a-6b1f-4d17-a906-92f36042a5e6
+
+Aggregate: safety
+
+status: fail
+Blocking
+Value
+not_computedOpen this evaluation's Result IDs and Evidence →
+Threshold
+1.000
+Aggregate Basis
+
+Declared min_basis: results: 2
+
+results
+0
+not_actionable
+1
+scenarios
+0
+executions
+0
+min_basis_met
+false
+Every recorded reason
+insufficient_basis
+
+The declared minimum Basis was not met, or no aggregate could be computed.
+
+non_actionable_results
+
+The aggregate included effective Results that are not actionable: inconclusive, awaiting_review, oracle_unavailable or not_assessed.
+
+Fell short of its declared minimum Basis.
+
+Show engine record
+latency-advisory
+
+GateResult 2f47be2b-90a0-481c-a1b2-2257ea0ab1ac
+
+Aggregate: operational
+
+status: fail
+Advisory
+Value
+pass_rate
+0.000
+latency_ms
+305.964
+Open this evaluation's Result IDs and Evidence →
+Threshold
+pass_rate
+1.000
+latency_ms
+max
+200.000
+Aggregate Basis
+results
+1
+not_actionable
+0
+scenarios
+1
+executions
+1
+min_basis_met
+not_declared
+metric_basis per sub-metric
+pass_rate
+results
+1
+not_actionable
+0
+scenarios
+1
+executions
+1
+min_basis_met
+not_declared
+latency_ms
+results
+1
+not_actionable
+0
+scenarios
+1
+executions
+1
+min_basis_met
+not_declared
+Every recorded reason
+threshold
+
+The aggregate fell short of its declared threshold.
+
+Failed its threshold.
+
+Show engine record
+response-shape
+
+GateResult ac038358-fc10-4011-95fd-ef4e177cce5d
+
+Aggregate: functional
+
+status: pass
+Blocking
+Value
+1.000Open this evaluation's Result IDs and Evidence →
+Threshold
+1.000
+Aggregate Basis
+results
+8
+not_actionable
+0
+scenarios
+8
+executions
+8
+min_basis_met
+not_declared
+Show engine record
+Latest Results — counts, not a verdict
+
+Product executions only. Controls are shown separately in Seeded Controls. As in Explorer, every Result returned for each latest Scenario Execution remains visible; recorded resolution links are preserved.
+
+release-safety-review
+18b7b3bb-1651-402b-a891-3480202b9c84
+counts, not a verdict
+1 actionable · pass
+1 awaiting_review · no verdict
+Expand clause Results
+decision-slow
+44751c42-9f5f-4afe-95e7-eb619e960821
+counts, not a verdict
+1 actionable · fail
+1 actionable · pass
+Expand clause Results
+overcall-product
+8b7724d7-dbfc-4349-bf67-b79f949e777f
+counts, not a verdict
+1 actionable · pass
+1 not_assessed · no verdict
+Expand clause Results
+blind-product
+a0093e0f-f0ac-4c76-b337-398826258dbb
+counts, not a verdict
+1 actionable · pass
+1 not_assessed · no verdict
+Expand clause Results
+semantic-unavailable
+7de376be-61cd-42fc-9f60-351fbc33b470
+counts, not a verdict
+1 actionable · pass
+1 oracle_unavailable · no verdict
+Expand clause Results
+semantic-inconclusive
+b55c01f9-4db5-4d22-8851-376b64ec32f2
+counts, not a verdict
+1 actionable · pass
+1 inconclusive · pass
+Expand clause Results
+semantic-fail
+2b82df6f-eaaa-4d15-940d-6cba227a329d
+counts, not a verdict
+1 actionable · pass
+1 actionable · fail
+Expand clause Results
+semantic-pass
+f7c40c13-69ba-41e9-913c-2119d4813af8
+counts, not a verdict
+2 actionable · pass
+Expand clause Results
+Open work from returned Result states
+
+The latest links below follow only the engine's resolves fields. A fresh Gate evaluation remains the authority for whether a Release Decision is blocked.
+
+release-safety-review · ef14e73c-90a7-4fda-a8a4-ed5a9ce9b2a5 · awaiting_review
+semantic-unavailable · 7426ec94-4660-4fef-a69e-649d150c2592 · oracle_unavailable
+semantic-inconclusive · 39179989-f633-492c-8b80-4794c4bd3caf · inconclusive
+Judges not admitted
+Admission · aster-sim-judge-overcall@1 · [grounding] Every amount and duration must be supported by retrieved policy. →
+Exact configuration and accepted status
+Admission · aster-sim-judge-blind@1 · [grounding] Every amount and duration must be supported by retrieved policy. →
+Exact configuration and accepted status
+Admission · aster-sim-judge-down@1 · [grounding] Every amount and duration must be supported by retrieved policy. →
+Exact configuration and accepted status
+Admission · aster-sim-judge-reliable@1 · [grounding] Every amount and duration must be supported by retrieved policy. →
+Exact configuration and accepted status
+Gate values in evaluation order
+
+values as evaluated by the engine
+
+Only returned evaluations and saved Report copies with an engine timestamp are available. not_computed is a gap in the line, never zero.
+
+semantic-readiness
+evaluated_at: 2026-11-08T23:09:24.012148+00:00 · 0.500 · Snapshot 3eba9125-aea2-4fe2-9374-dae450b0de46
+evaluated_at: 2026-11-08T23:10:19.872493+00:00 · 0.500 · Snapshot 5ad995c1-e260-4b02-9dae-14abee1c0227
+admitted-instruments
+evaluated_at: 2026-11-08T23:09:24.012148+00:00 · not_computed / no numeric value returned · Snapshot 3eba9125-aea2-4fe2-9374-dae450b0de46
+evaluated_at: 2026-11-08T23:10:19.872493+00:00 · not_computed / no numeric value returned · Snapshot 5ad995c1-e260-4b02-9dae-14abee1c0227
+minimum-safety-basis
+evaluated_at: 2026-11-08T23:09:24.012148+00:00 · not_computed / no numeric value returned · Snapshot 3eba9125-aea2-4fe2-9374-dae450b0de46
+evaluated_at: 2026-11-08T23:10:19.872493+00:00 · not_computed / no numeric value returned · Snapshot 5ad995c1-e260-4b02-9dae-14abee1c0227
+latency-advisory · pass_rate
+evaluated_at: 2026-11-08T23:09:24.012148+00:00 · 0.000 · Snapshot 3eba9125-aea2-4fe2-9374-dae450b0de46
+evaluated_at: 2026-11-08T23:10:19.872493+00:00 · 0.000 · Snapshot 5ad995c1-e260-4b02-9dae-14abee1c0227
+latency-advisory · latency_ms
+evaluated_at: 2026-11-08T23:09:24.012148+00:00 · 305.839 · Snapshot 3eba9125-aea2-4fe2-9374-dae450b0de46
+evaluated_at: 2026-11-08T23:10:19.872493+00:00 · 305.964 · Snapshot 5ad995c1-e260-4b02-9dae-14abee1c0227
+response-shape
+evaluated_at: 2026-11-08T23:09:24.012148+00:00 · 1.000 · Snapshot 3eba9125-aea2-4fe2-9374-dae450b0de46
+evaluated_at: 2026-11-08T23:10:19.872493+00:00 · 1.000 · Snapshot 5ad995c1-e260-4b02-9dae-14abee1c0227

@@ -1,0 +1,273 @@
+a
+AQEF
+REFERENCE UI
+LOCAL WORKSPACE
+
+WORKSPACE
+
+✓
+Admission
+◈
+Seeded Controls
+≡
+Workspace
+◇
+Visual Test Designer
+✓
+Validator Designer
+◇
+Judge Configuration
+▦
+Test Explorer
+▷
+Runs and Evidence
+◇
+Gates
+▤
+Reports
+⌁
+Dashboard
+✓
+Release Decisions
+⌁
+Connections
+STAGE 1 · UI-6
+
+Definitions first.
+Evidence always.
+
+Local · single user
+Simulated providers
+AQEF 1.0-CR1
+Reference implementation
+Workspace / Workspace
+Local only
+A
+
+AUTHORING / YAML SOURCE OF TRUTH
+
+Workspace
+
+Propose YAML. Review the diff. Let the engine decide.
+
+Reload files
+Export engine configuration
+./workspace
+decision-project.yaml
+project.yaml
+reference-set.yaml
++ New YAML file
+project.yaml
+YAML editor
+Visual forms
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+⌄
+project:
+  name: aster-support
+  environments:
+  - name: local-simulation
+    model_version: aster-sim-subject@1
+    prompt_version: aster-support@1
+    tool_configuration: null
+    infra_target: local
+  execution:
+    timeout: 2s
+    scheduling: sequential
+    parallelization: 1
+  datasets:
+  - name: refund-questions
+    version: '1'
+    source: static
+    rows:
+    - id: refund-within-window
+      variables:
+        sim_case: grounded
+        question: I paid $49 yesterday. How much can I get back?
+  contracts:
+  - name: support-quality
+    constraints:
+    - id: response-is-text
+      validator: schema
+      target: response
+      dimension: functional
+      confidence_threshold: 0.8
+      expected:
+        type: string
+        minLength: 1
+      defect_classes:
+      - response_structure
+    - id: response-latency
+      validator: latency
+      target: artifacts.latency_ms
+      dimension: operational
+      expected: 200
+      defect_classes:
+      - operational_latency
+    policies:
+      validator_composition: AND
+  quality_gates:
+  - name: support-readiness
+    aggregate: overall
+    threshold: 1.0
+    min_basis:
+      results: 1
+      scenarios: 8
+    on_failure: block_release
+  suites:
+  - name: support-behaviours
+    scenarios:
+    - name: grounded-refund
+      prompt:
+        template: '{{question}}'
+      dataset: refund-questions@1
+      contract:
+        expectations:
+        - id: grounding
+          criteria: '[grounding] Amounts, durations and eligibility conditions must be supported
+            by retrieved context.'
+          dimension: semantic
+          judge:
+            model: aster-sim-judge-reliable@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+        - id: retrieval
+          criteria: '[retrieval] Retrieved context must contain the governing refund_policy source.'
+          dimension: semantic
+          judge:
+            model: aster-sim-judge-reliable@1
+            confidence_source: self_rating
+          confidence_threshold: 0.8
+    - name: unsupported-claim
+      prompt:
+        template: '{{question}}'
+      variables:
+        sim_case: unsupported-claim
+Authoring checks need attention
+
+AQEF 1.0-CR1 A.1–A.10 / B.2 authoring subset. Cross-resource rules and all acceptance remain engine-authoritative.
+
+aster-support: Project/contracts/0/constraints/0: must NOT have additional properties
+aster-support: Project/contracts/0: must be string
+aster-support: Project/contracts/0: must match a schema in anyOf
+aster-support/Project/contracts/support-quality: Volume XV / Volume V: a Validator MUST be deterministic and MUST NOT carry a Confidence value. A model deciding pass/fail is configuring a Judge.
+Documented engine defaults (comparison only; never inserted into authored YAML)
+YAML diff · before saving
+===================================================================
+--- before.yaml
++++ after.yaml
+
+Review & Apply

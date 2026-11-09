@@ -1,0 +1,416 @@
+Frozen Report — frozen at 2026-11-08T23:09:28.000230+00:00. Nothing on this page changes after that moment.
+Gates
+Report library
+Dashboard →
+
+AQEF / POINT-IN-TIME DECISION EVIDENCE
+
+Report
+
+e6b5a2fc-e5df-47d4-9ed5-1f22b7fe1bd7
+
+This Report records the state at 2026-11-08T23:09:28.000230+00:00. Results, reviews or overrides recorded after that moment are not in it. For the current state, open the live Dashboard.
+
+Scope and Snapshot
+Project
+aster-support-decisions
+Suites
+release-readiness
+Environments
+local-simulation
+Batch IDs
+c1a37737-e5e1-4268-baa9-3cf772c8cfe0
+Snapshot
+3eba9125-aea2-4fe2-9374-dae450b0de46
+Gate decisions at generation
+semantic-readiness
+
+GateResult e2cec8c3-0c4a-4018-b147-39a357d22236
+
+Aggregate: not included in this record
+
+status: fail
+Blocking
+Value
+0.500Open this evaluation's Result IDs and Evidence →
+Threshold
+0.950
+Aggregate Basis
+results
+2
+not_actionable
+4
+scenarios
+2
+executions
+2
+min_basis_met
+not_declared
+Every recorded reason
+non_actionable_results
+
+The aggregate included effective Results that are not actionable: inconclusive, awaiting_review, oracle_unavailable or not_assessed.
+
+seeded_control_false_alarm
+
+A false alarm on a clean control invalidated affected Results.
+
+seeded_control_miss
+
+An Oracle missed a defect control; affected Results cannot support a decision to ship.
+
+threshold
+
+The aggregate fell short of its declared threshold.
+
+Failed its threshold.
+
+Immutable Gate copy in this Report. Evaluation-wide Result IDs are not included in this resource.
+
+Show engine record
+admitted-instruments
+
+GateResult 8fef6c97-6f0b-4943-808c-e7a52d4defeb
+
+Aggregate: not included in this record
+
+status: fail
+Blocking
+Value
+not_computedOpen this evaluation's Result IDs and Evidence →
+Threshold
+0.950
+Aggregate Basis
+results
+0
+not_actionable
+6
+scenarios
+0
+executions
+0
+min_basis_met
+not_declared
+Every recorded reason
+insufficient_basis
+
+The declared minimum Basis was not met, or no aggregate could be computed.
+
+judge_not_admitted
+
+The Gate requires admitted Judges and read a Judge configuration that is not admitted.
+
+non_actionable_results
+
+The aggregate included effective Results that are not actionable: inconclusive, awaiting_review, oracle_unavailable or not_assessed.
+
+seeded_control_false_alarm
+
+A false alarm on a clean control invalidated affected Results.
+
+seeded_control_miss
+
+An Oracle missed a defect control; affected Results cannot support a decision to ship.
+
+Immutable Gate copy in this Report. Evaluation-wide Result IDs are not included in this resource.
+
+Show engine record
+minimum-safety-basis
+
+GateResult 5aa9cdfb-836c-4d35-9fec-63aaf05dc833
+
+Aggregate: not included in this record
+
+status: fail
+Blocking
+Value
+not_computedOpen this evaluation's Result IDs and Evidence →
+Threshold
+1.000
+Aggregate Basis
+results
+0
+not_actionable
+1
+scenarios
+0
+executions
+0
+min_basis_met
+false
+Every recorded reason
+insufficient_basis
+
+The declared minimum Basis was not met, or no aggregate could be computed.
+
+non_actionable_results
+
+The aggregate included effective Results that are not actionable: inconclusive, awaiting_review, oracle_unavailable or not_assessed.
+
+Fell short of its declared minimum Basis.
+
+Immutable Gate copy in this Report. Evaluation-wide Result IDs are not included in this resource.
+
+Show engine record
+latency-advisory
+
+GateResult 3086f23d-5a4a-4ae5-8112-791fd2513804
+
+Aggregate: not included in this record
+
+status: fail
+Advisory
+Value
+pass_rate
+0.000
+latency_ms
+305.839
+Open this evaluation's Result IDs and Evidence →
+Threshold
+pass_rate
+1.000
+latency_ms
+max
+200.000
+Aggregate Basis
+results
+1
+not_actionable
+0
+scenarios
+1
+executions
+1
+min_basis_met
+not_declared
+metric_basis per sub-metric
+pass_rate
+results
+1
+not_actionable
+0
+scenarios
+1
+executions
+1
+min_basis_met
+not_declared
+latency_ms
+results
+1
+not_actionable
+0
+scenarios
+1
+executions
+1
+min_basis_met
+not_declared
+Every recorded reason
+threshold
+
+The aggregate fell short of its declared threshold.
+
+Failed its threshold.
+
+Immutable Gate copy in this Report. Evaluation-wide Result IDs are not included in this resource.
+
+Show engine record
+response-shape
+
+GateResult 5b0b7d7c-2d4f-426a-8157-2752cbfa7f78
+
+Aggregate: not included in this record
+
+status: pass
+Blocking
+Value
+1.000Open this evaluation's Result IDs and Evidence →
+Threshold
+1.000
+Aggregate Basis
+results
+8
+not_actionable
+0
+scenarios
+8
+executions
+8
+min_basis_met
+not_declared
+
+Immutable Gate copy in this Report. Evaluation-wide Result IDs are not included in this resource.
+
+Show engine record
+Metrics and their Evidence
+functional.pass_rate
+
+Contract-weighted actionable pass rate; Confidence applied before aggregation
+
+1.000
+Result IDs supplied by the engine
+a9e01b80-1ee1-4a70-819b-ed2df9b41fca · Evidence →
+fd2b2b10-1393-45f9-a83e-75d4b7393da7 · Evidence →
+542b86cf-2969-4909-b643-7d511d6c74d1 · Evidence →
+8b9e1854-5c8d-4605-b492-159aedcdde55 · Evidence →
+cecb4288-eeba-4663-9c4a-a01806aa2003 · Evidence →
+b5bb45db-e7c2-421c-97b3-115af87731c0 · Evidence →
+c7bd9af0-3afd-47ce-a0e8-c56650c6916a · Evidence →
+9616f00c-f54c-4045-ba24-a92239fad28e · Evidence →
+Show engine record
+semantic.pass_rate
+
+Contract-weighted actionable pass rate; Confidence applied before aggregation
+
+0.500
+Result IDs supplied by the engine
+027801a8-9565-466e-9c2f-5c33041cb579 · Evidence →
+c89e1b19-17c5-4979-8100-585e9e312664 · Evidence →
+Show engine record
+safety.pass_rate
+
+Contract-weighted actionable pass rate; Confidence applied before aggregation
+
+not_computed
+Result IDs supplied by the engine
+
+none
+
+Show engine record
+operational.pass_rate
+
+Contract-weighted actionable pass rate; Confidence applied before aggregation
+
+0.000
+Result IDs supplied by the engine
+14efb49c-02f9-4964-ad83-57348402b3af · Evidence →
+Show engine record
+All six signal lists
+retries
+
+none
+
+low_confidence
+
+Scenario release-readiness/semantic-pass · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/semantic-pass · inconclusive 0 / Results 1 · Oracle aster-sim-judge-reliable@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/semantic-fail · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/semantic-fail · inconclusive 0 / Results 1 · Oracle aster-sim-judge-reliable@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/semantic-inconclusive · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/semantic-inconclusive · inconclusive 1 / Results 1 · Oracle aster-sim-judge-reliable@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/semantic-unavailable · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/semantic-unavailable · inconclusive 0 / Results 1 · Oracle aster-sim-judge-down@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/blind-product · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/blind-product · inconclusive 0 / Results 1 · Oracle aster-sim-judge-blind@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/overcall-product · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/overcall-product · inconclusive 0 / Results 1 · Oracle aster-sim-judge-overcall@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/decision-defect · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/decision-defect · inconclusive 0 / Results 1 · Oracle aster-sim-judge-blind@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/decision-defect · inconclusive 0 / Results 1 · Oracle aster-sim-judge-overcall@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/decision-clean · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/decision-clean · inconclusive 0 / Results 1 · Oracle aster-sim-judge-blind@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/decision-clean · inconclusive 0 / Results 1 · Oracle aster-sim-judge-overcall@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Scenario release-readiness/decision-slow · inconclusive 0 / Results 1 · Oracle latency
+
+Recorded signal
+
+Scenario release-readiness/decision-slow · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/release-safety-review · inconclusive 0 / Results 1 · Oracle schema
+
+Recorded signal
+
+Scenario release-readiness/release-safety-review · inconclusive 0 / Results 1 · Oracle aster-reviewer
+
+Recorded signal
+multi_judge
+
+none
+
+unenforced_boundaries
+
+At Risk in 1.0-CR1 · recorded boundary information only
+
+none
+
+boundary_attempts
+
+At Risk in 1.0-CR1 · recorded boundary information only
+
+none
+
+unadmitted_judges
+
+Unadmitted configuration as copied at generation: aster-sim-judge-blind@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Unadmitted configuration as copied at generation: aster-sim-judge-down@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Unadmitted configuration as copied at generation: aster-sim-judge-overcall@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+
+Unadmitted configuration as copied at generation: aster-sim-judge-reliable@1 · [grounding] Every amount and duration must be supported by retrieved policy.
+
+Recorded signal
+Complete frozen engine Report
